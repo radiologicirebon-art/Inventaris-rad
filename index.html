@@ -3,85 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MEDIC-EQ | Live Dashboard</title>
+    <title>MEDIC-EQ PRO | Integrated Health Tech</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏥</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
+        .active-menu { background: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.4); }
+        .hidden { display: none; }
     </style>
 </head>
-<body class="flex min-h-screen">
+<body class="flex h-screen overflow-hidden">
 
-    <aside class="w-64 bg-[#0f172a] text-slate-300 flex flex-col hidden md:flex">
-        <div class="p-6 text-white font-bold text-xl flex items-center gap-2">
-            <i data-lucide="activity" class="text-blue-500"></i>
-            <span>MEDIC-EQ</span>
+    <aside class="w-72 bg-[#0f172a] text-slate-400 p-6 flex flex-col shrink-0">
+        <div class="flex items-center gap-3 text-white mb-10 px-2">
+            <div class="bg-blue-600 p-2 rounded-lg">
+                <i data-lucide="shield-check" class="w-6 h-6"></i>
+            </div>
+            <span class="text-xl font-bold tracking-tight">MEDIC-EQ <span class="text-blue-500">PRO</span></span>
         </div>
-        <nav class="flex-1 px-4 space-y-1">
-            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-white bg-blue-600"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard</a>
-            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800"><i data-lucide="database" class="w-5 h-5"></i> Inventaris</a>
-            <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800"><i data-lucide="wrench" class="w-5 h-5"></i> Maintenance</a>
+
+        <nav class="flex-1 space-y-2">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4 px-2">Menu Utama</p>
+            <button onclick="showPage('dashboard')" id="btn-dashboard" class="menu-link active-menu w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all">
+                <i data-lucide="layout-grid" class="w-5 h-5"></i> <span class="font-medium">Dashboard Overview</span>
+            </button>
+            <button onclick="showPage('inventory')" id="btn-inventory" class="menu-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition-all">
+                <i data-lucide="database" class="w-5 h-5"></i> <span class="font-medium">Inventaris Alat</span>
+            </button>
+            <button onclick="showPage('maintenance')" id="btn-maintenance" class="menu-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition-all">
+                <i data-lucide="wrench" class="w-5 h-5"></i> <span class="font-medium">Maintenance & PM</span>
+            </button>
+            <button onclick="showPage('logs')" id="btn-logs" class="menu-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition-all">
+                <i data-lucide="file-clock" class="w-5 h-5"></i> <span class="font-medium">Audit Trail Logs</span>
+            </button>
         </nav>
+
+        <div class="mt-auto p-4 bg-slate-800/50 rounded-2xl">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold">I</div>
+                <div>
+                    <p class="text-sm font-semibold text-white">Ino - Admin</p>
+                    <p class="text-[10px] text-green-500 font-bold uppercase">Online • JCI Ready</p>
+                </div>
+            </div>
+        </div>
     </aside>
 
-    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
-        <header class="h-16 glass-card px-8 flex items-center justify-between sticky top-0 z-10">
-            <h2 class="text-lg font-semibold text-slate-800">Real-time Monitoring</h2>
-            <div id="connectionStatus" class="flex items-center gap-2 text-xs font-bold text-orange-500 italic">
-                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span></span>
-                CONNECTING TO FIREBASE...
+    <main class="flex-1 flex flex-col overflow-hidden">
+        
+        <header class="h-20 bg-white/80 backdrop-blur-md px-8 flex items-center justify-between border-b border-slate-200">
+            <div>
+                <h1 id="page-title" class="text-xl font-bold text-slate-800">Dashboard Overview</h1>
+                <p class="text-xs text-slate-500">Real-time data dari Firebase Cloud Database</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="sync-indicator" class="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-600 rounded-full text-[10px] font-bold border border-green-100">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    DATABASE SYNCED
+                </div>
             </div>
         </header>
 
-        <div class="p-8 space-y-8">
-            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="glass-card p-6 rounded-xl border-l-4 border-blue-500">
-                    <p class="text-sm font-medium text-slate-500">Alat Aktif</p>
-                    <h3 id="count-aktif" class="text-3xl font-bold text-slate-800">--</h3>
+        <div class="flex-1 overflow-y-auto p-8 custom-scroll">
+            
+            <div id="page-dashboard" class="page-content space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="glass-card p-6 rounded-3xl shadow-sm border-b-4 border-blue-500">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-blue-50 rounded-lg text-blue-600"><i data-lucide="check-circle" class="w-5 h-5"></i></div>
+                            <span class="text-[10px] font-bold text-green-600">+2.5%</span>
+                        </div>
+                        <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Total Alat Aktif</p>
+                        <h2 id="stat-aktif" class="text-4xl font-black text-slate-800 mt-1">0</h2>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl shadow-sm border-b-4 border-red-500">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-red-50 rounded-lg text-red-600"><i data-lucide="alert-triangle" class="w-5 h-5"></i></div>
+                            <span id="label-rusak" class="text-[10px] font-bold text-red-600">WARNING</span>
+                        </div>
+                        <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Alat Rusak (CM)</p>
+                        <h2 id="stat-rusak" class="text-4xl font-black text-slate-800 mt-1">0</h2>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl shadow-sm border-b-4 border-orange-500">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-orange-50 rounded-lg text-orange-600"><i data-lucide="calendar-clock" class="w-5 h-5"></i></div>
+                        </div>
+                        <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">PM Overdue</p>
+                        <h2 id="stat-overdue" class="text-4xl font-black text-slate-800 mt-1">0</h2>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl shadow-sm border-b-4 border-emerald-500">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600"><i data-lucide="award" class="w-5 h-5"></i></div>
+                        </div>
+                        <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">JCI Compliance</p>
+                        <h2 id="stat-compliance" class="text-4xl font-black text-slate-800 mt-1">0%</h2>
+                    </div>
                 </div>
-                <div class="glass-card p-6 rounded-xl border-l-4 border-red-500">
-                    <p class="text-sm font-medium text-slate-500">Alat Rusak</p>
-                    <h3 id="count-rusak" class="text-3xl font-bold text-slate-800">--</h3>
-                </div>
-                <div class="glass-card p-6 rounded-xl border-l-4 border-yellow-500">
-                    <p class="text-sm font-medium text-slate-500">PM Overdue</p>
-                    <h3 id="count-overdue" class="text-3xl font-bold text-slate-800">--</h3>
-                </div>
-                <div class="glass-card p-6 rounded-xl border-l-4 border-emerald-500">
-                    <p class="text-sm font-medium text-slate-500">Compliance</p>
-                    <h3 id="compliance-rate" class="text-3xl font-bold text-slate-800">--%</h3>
-                </div>
-            </section>
 
-            <section class="glass-card rounded-xl shadow-sm overflow-hidden">
-                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                    <h4 class="font-bold text-slate-800 uppercase text-sm tracking-widest">Live Equipment Status</h4>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 glass-card p-8 rounded-3xl shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
+                            <i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-500"></i> Tren Downtime Bulanan
+                        </h3>
+                        <canvas id="mainChart" height="150"></canvas>
+                    </div>
+                    <div class="glass-card p-8 rounded-3xl shadow-sm">
+                        <h3 class="font-bold text-slate-800 mb-6">Insiden Terbaru</h3>
+                        <div id="recent-incidents" class="space-y-4">
+                            <p class="text-sm text-slate-400 italic">Menunggu data...</p>
+                        </div>
+                    </div>
                 </div>
-                <table class="w-full text-left">
-                    <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-semibold">
-                        <tr>
-                            <th class="px-6 py-4">ID Alat</th>
-                            <th class="px-6 py-4">Nama</th>
-                            <th class="px-6 py-4">Lokasi</th>
-                            <th class="px-6 py-4">Status</th>
-                            <th class="px-6 py-4">Risiko</th>
-                        </tr>
-                    </thead>
-                    <tbody id="equipment-table-body" class="divide-y divide-slate-100 bg-white text-sm">
-                        </tbody>
-                </table>
-            </section>
+            </div>
+
+            <div id="page-inventory" class="page-content hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex gap-2">
+                        <input type="text" placeholder="Cari Kode atau Nama..." class="px-4 py-2 border rounded-xl text-sm w-64 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                    <button onclick="toggleModal('modal-add')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Tambah Alat Baru
+                    </button>
+                </div>
+                
+                <div class="glass-card rounded-3xl overflow-hidden shadow-sm">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase tracking-widest font-bold">
+                            <tr>
+                                <th class="px-6 py-4">Informasi Alat</th>
+                                <th class="px-6 py-4">Tipe / SN</th>
+                                <th class="px-6 py-4">Lokasi</th>
+                                <th class="px-6 py-4">Risiko</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table" class="text-sm divide-y divide-slate-100">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="page-logs" class="page-content hidden">
+                <div class="max-w-3xl mx-auto glass-card rounded-3xl p-8">
+                    <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <i data-lucide="history" class="w-5 h-5 text-indigo-500"></i> System Audit Trail (Wajib JCI)
+                    </h3>
+                    <div id="log-list" class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-z-10 before:h-full before:w-0.5 before:bg-slate-100">
+                        </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
+    <div id="modal-add" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+                <h3 class="font-bold text-slate-800 text-lg">Input Data Alat Medis</h3>
+                <button onclick="toggleModal('modal-add')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x"></i></button>
+            </div>
+            <form id="form-add-equipment" class="p-8 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Kode Alat</label>
+                        <input name="kode" type="text" required placeholder="RAD-CT-001" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Nama Alat</label>
+                        <input name="nama" type="text" required placeholder="CT-Scan" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Lokasi</label>
+                        <input name="lokasi" type="text" required placeholder="Radiologi" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Risiko</label>
+                        <select name="risiko" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                            <option value="low">Low Risk</option>
+                            <option value="medium">Medium Risk</option>
+                            <option value="high">High Risk</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="toggleModal('modal-add')" class="flex-1 px-4 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all">Batal</button>
+                    <button type="submit" class="flex-1 px-4 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Konfigurasi Anda
         const firebaseConfig = {
             apiKey: "AIzaSyC9vzs1ddViMPx4DtfK2ny2v5booWJGEZA",
             authDomain: "inventaris-alat-rad.firebaseapp.com",
@@ -92,61 +219,184 @@
             appId: "1:273303382914:web:2db485573f130636513d9b"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // UI Elements
-        const eqTable = document.getElementById('equipment-table-body');
-        const statusIndicator = document.getElementById('connectionStatus');
-
-        // Listen to Equipment Data
+        // --- REAL-TIME DATA LISTENER ---
         const eqRef = ref(db, 'equipment');
         onValue(eqRef, (snapshot) => {
             const data = snapshot.val();
-            if (data) {
-                // Update Status UI
-                statusIndicator.innerHTML = `<span class="h-2 w-2 rounded-full bg-green-500"></span> LIVE SYSTEM ACTIVE`;
-                statusIndicator.className = "flex items-center gap-2 text-xs font-bold text-green-600";
+            renderDashboard(data);
+            renderInventory(data);
+        });
 
-                let activeCount = 0;
-                let brokenCount = 0;
-                eqTable.innerHTML = ''; // Clear table
+        const logRef = ref(db, 'logs');
+        onValue(logRef, (snapshot) => renderLogs(snapshot.val()));
 
-                Object.keys(data).forEach(key => {
-                    const eq = data[key];
-                    if(eq.status === 'aktif') activeCount++;
-                    if(eq.status === 'rusak') brokenCount++;
+        // --- RENDER FUNCTIONS ---
+        function renderDashboard(data) {
+            if (!data) return;
+            const items = Object.values(data);
+            const aktif = items.filter(i => i.status === 'aktif').length;
+            const rusak = items.filter(i => i.status === 'rusak').length;
+            
+            document.getElementById('stat-aktif').innerText = aktif;
+            document.getElementById('stat-rusak').innerText = rusak;
+            document.getElementById('stat-compliance').innerText = aktif > 0 ? Math.round((aktif/items.length)*100) + '%' : '0%';
+            
+            const labelRusak = document.getElementById('label-rusak');
+            if(rusak > 0) {
+                labelRusak.className = "text-[10px] font-black text-red-600 animate-pulse";
+                labelRusak.innerText = "CRITICAL ACTION REQUIRED";
+            } else {
+                labelRusak.className = "text-[10px] font-bold text-green-600";
+                labelRusak.innerText = "ALL CLEAR";
+            }
+        }
 
-                    // Render Table Row
-                    const row = `
-                        <tr class="hover:bg-slate-50">
-                            <td class="px-6 py-4 font-mono text-blue-600">${eq.kode || key}</td>
-                            <td class="px-6 py-4 font-semibold">${eq.nama}</td>
-                            <td class="px-6 py-4 text-slate-500">${eq.lokasi}</td>
-                            <td class="px-6 py-4">
-                                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${eq.status === 'aktif' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-                                    ${eq.status}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 font-bold ${eq.risiko === 'high' ? 'text-red-500' : 'text-slate-400'}">
-                                ${eq.risiko ? eq.risiko.toUpperCase() : '-'}
-                            </td>
-                        </tr>
-                    `;
-                    eqTable.innerHTML += row;
+        function renderInventory(data) {
+            const container = document.getElementById('inventory-table');
+            container.innerHTML = '';
+            if (!data) return;
+
+            Object.keys(data).forEach(id => {
+                const eq = data[id];
+                const row = `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <p class="font-bold text-slate-800">${eq.nama}</p>
+                            <p class="text-[10px] text-blue-600 font-mono tracking-tighter uppercase">${eq.kode}</p>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-500">SN: ${eq.serial_number || '-'}</td>
+                        <td class="px-6 py-4 text-xs font-medium text-slate-600">${eq.lokasi}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded text-[9px] font-black uppercase ${eq.risiko === 'high' ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-500'}">
+                                ${eq.risiko || 'low'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full ${eq.status === 'aktif' ? 'bg-green-500' : 'bg-red-500'}"></span>
+                                <span class="text-xs font-bold capitalize">${eq.status}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <button class="p-2 hover:bg-slate-100 rounded-lg text-slate-400"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>
+                `;
+                container.innerHTML += row;
+            });
+            lucide.createIcons();
+        }
+
+        function renderLogs(data) {
+            const container = document.getElementById('log-list');
+            container.innerHTML = '';
+            if (!data) return;
+
+            Object.values(data).reverse().slice(0, 10).forEach(log => {
+                const item = `
+                    <div class="relative pl-12">
+                        <div class="absolute left-0 top-0 w-10 h-10 bg-white border-2 border-slate-100 rounded-full flex items-center justify-center z-10">
+                            <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-slate-800">${log.user || 'System'}</span>
+                                <span class="text-[10px] text-slate-400">${new Date(log.waktu).toLocaleString('id-ID')}</span>
+                            </div>
+                            <p class="text-sm text-slate-600">${log.aksi}</p>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += item;
+            });
+            lucide.createIcons();
+        }
+
+        // --- WRITE DATA (FORM HANDLER) ---
+        document.getElementById('form-add-equipment').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const newEq = {
+                kode: formData.get('kode'),
+                nama: formData.get('nama'),
+                lokasi: formData.get('lokasi'),
+                risiko: formData.get('risiko'),
+                status: 'aktif',
+                created_at: serverTimestamp()
+            };
+
+            try {
+                // Simpan ke equipment
+                const newRef = push(eqRef);
+                await set(newRef, newEq);
+                
+                // Simpan ke logs
+                push(logRef, {
+                    user: 'Ino',
+                    aksi: `Menambah alat baru: ${newEq.nama} (${newEq.kode})`,
+                    waktu: Date.now()
                 });
 
-                // Update KPI Cards
-                document.getElementById('count-aktif').innerText = activeCount;
-                document.getElementById('count-rusak').innerText = brokenCount;
-                // Mockup PM logic (Anda bisa kembangkan query-nya)
-                document.getElementById('count-overdue').innerText = "0"; 
-                document.getElementById('compliance-rate').innerText = "100%";
+                toggleModal('modal-add');
+                e.target.reset();
+                alert('Data berhasil disimpan ke Firebase!');
+            } catch (err) {
+                alert('Error: ' + err.message);
             }
         });
 
-        // Initialize Lucide Icons
+    </script>
+
+    <script>
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+            // Remove active classes
+            document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active-menu', 'bg-blue-600', 'text-white'));
+            
+            // Show target page
+            document.getElementById('page-' + pageId).classList.remove('hidden');
+            document.getElementById('btn-' + pageId).classList.add('active-menu');
+            
+            // Update Title
+            const titles = {
+                'dashboard': 'Dashboard Overview',
+                'inventory': 'Manajemen Inventaris',
+                'maintenance': 'Preventive Maintenance',
+                'logs': 'Audit Trail Logs'
+            };
+            document.getElementById('page-title').innerText = titles[pageId];
+            lucide.createIcons();
+        }
+
+        function toggleModal(id) {
+            document.getElementById(id).classList.toggle('hidden');
+        }
+
+        // Chart Init
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                datasets: [{
+                    label: 'Jam Downtime',
+                    data: [15, 12, 25, 8, 4, 10],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+            }
+        });
+
         lucide.createIcons();
     </script>
 </body>
