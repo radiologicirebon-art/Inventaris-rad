@@ -3,324 +3,994 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RSMP | Radiologi Inventory PRO</title>
-    
+    <title>RSMP | Radiologi Inventory PRO v.2</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☢️</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
-        .active-menu { background: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4); }
-        .glass-card { background: rgba(255, 255, 255, 1); border: 1px solid #e2e8f0; }
-        .hidden { display: none; }
+        :root {
+            --sidebar-bg: #0a0f1e;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59,130,246,0.25);
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
         
-        /* Mobile Sidebar Logic */
+        /* Sidebar */
+        #sidebar { background: var(--sidebar-bg); }
+        .active-menu { background: var(--accent); color: white; box-shadow: 0 8px 24px var(--accent-glow); }
+        .menu-link:not(.active-menu):hover { background: rgba(255,255,255,0.06); color: #94a3b8; }
+
+        /* Mobile */
         @media (max-width: 1024px) {
-            #sidebar { transform: translateX(-100%); transition: transform 0.3s ease; position: fixed; z-index: 100; height: 100vh; }
+            #sidebar { transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); position: fixed; z-index: 100; height: 100vh; }
             #sidebar.open { transform: translateX(0); }
             #overlay { display: none; }
-            #overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; }
+            #overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50; backdrop-filter: blur(2px); }
         }
 
-        /* Custom Scrollbar */
-        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
-        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        /* Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        /* Cards */
+        .stat-card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+
+        /* Table row */
+        .inv-row { transition: background 0.15s; }
+        .inv-row:hover { background: #f8faff; }
+
+        /* Status badges */
+        .badge-aktif { background: #d1fae5; color: #059669; }
+        .badge-rusak { background: #fee2e2; color: #dc2626; }
+        .badge-maintenance { background: #fef3c7; color: #d97706; }
+
+        /* Bapeten expire badges */
+        .exp-ok { background: #d1fae5; color: #059669; }
+        .exp-warn { background: #fef3c7; color: #d97706; }
+        .exp-danger { background: #fee2e2; color: #dc2626; }
+        .exp-expired { background: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
+
+        /* Toast */
+        #toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast { min-width: 260px; max-width: 340px; padding: 0.875rem 1.25rem; border-radius: 14px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 0.625rem; box-shadow: 0 8px 30px rgba(0,0,0,0.15); animation: slideUp 0.3s ease; }
+        .toast-success { background: #059669; color: white; }
+        .toast-error { background: #dc2626; color: white; }
+        .toast-info { background: #2563eb; color: white; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Modal */
+        .modal-overlay { background: rgba(15,23,42,0.85); backdrop-filter: blur(6px); }
+        .modal-box { border-radius: 24px; }
+        
+        /* Sidebar version badge */
+        .v-badge { font-size: 9px; letter-spacing: 0.08em; }
+
+        /* Chart bars */
+        .bar-fill { transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+
+        /* Page fade */
+        .page-content { animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Search highlight */
+        .search-highlight { background: #fef08a; border-radius: 2px; }
+
+        /* Lucide icons fix */
+        [data-lucide] { display: inline-block; vertical-align: middle; }
+
+        /* Pulse dot */
+        .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-slate-700">
 
-    <div id="overlay" onclick="toggleSidebar()"></div>
+<div id="overlay" onclick="toggleSidebar()"></div>
+<div id="toast-container"></div>
 
-    <aside id="sidebar" class="w-72 bg-[#0f172a] text-slate-400 p-6 flex flex-col shrink-0 border-r border-slate-800 lg:static">
-        <div class="flex items-center justify-between mb-10 px-2">
-            <div class="flex items-center gap-3 text-white">
-                <div class="bg-yellow-500 p-2 rounded-lg text-slate-900"><i data-lucide="radiation" class="w-6 h-6"></i></div>
-                <div>
-                    <span class="text-lg font-bold block leading-none tracking-tight">RSMP <span class="text-yellow-500 text-xs uppercase">Rad Pro</span></span>
-                    <span class="text-[9px] text-slate-500 uppercase font-bold">Inventory System v.1</span>
-                </div>
-            </div>
-            <button onclick="toggleSidebar()" class="lg:hidden text-slate-400"><i data-lucide="x"></i></button>
-        </div>
-
-        <nav class="flex-1 space-y-2">
-            <button onclick="showPage('dashboard')" id="btn-dashboard" class="menu-link active-menu w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all">
-                <i data-lucide="layout-grid" class="w-5 h-5"></i> <span class="font-medium">Dashboard</span>
-            </button>
-            <button onclick="showPage('inventory')" id="btn-inventory" class="menu-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition-all">
-                <i data-lucide="database" class="w-5 h-5"></i> <span class="font-medium">Inventaris Alat</span>
-            </button>
-            <button onclick="showPage('logs')" id="btn-logs" class="menu-link w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition-all">
-                <i data-lucide="file-clock" class="w-5 h-5"></i> <span class="font-medium">Audit Trail</span>
-            </button>
-        </nav>
-
-        <div class="mt-auto pt-6 border-t border-slate-800 px-2">
-            <p class="text-[10px] uppercase font-bold text-slate-500 mb-2">Developed By</p>
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">IR</div>
-                <p class="text-sm font-bold text-white">Ino Rad</p>
+<!-- SIDEBAR -->
+<aside id="sidebar" class="w-72 text-slate-400 p-5 flex flex-col shrink-0 border-r border-slate-800 lg:static overflow-y-auto custom-scroll">
+    <div class="flex items-center justify-between mb-8 px-2">
+        <div class="flex items-center gap-3 text-white">
+            <div class="bg-yellow-500 p-2 rounded-xl text-slate-900 shrink-0"><i data-lucide="radiation" class="w-5 h-5"></i></div>
+            <div>
+                <span class="text-base font-extrabold block leading-none tracking-tight">RSMP <span class="text-yellow-400 text-[10px] uppercase font-black">Rad Pro</span></span>
+                <span class="v-badge text-slate-500 uppercase font-bold">Inventory System v.2</span>
             </div>
         </div>
-    </aside>
+        <button onclick="toggleSidebar()" class="lg:hidden text-slate-500 hover:text-white p-1"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
 
-    <main class="flex-1 flex flex-col overflow-hidden w-full">
-        
-        <header class="h-16 lg:h-20 bg-white border-b px-4 lg:px-8 flex items-center justify-between shrink-0">
-            <div class="flex items-center gap-4">
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 bg-slate-100 rounded-lg"><i data-lucide="menu" class="w-5 h-5"></i></button>
-                <h1 id="page-title" class="text-lg lg:text-xl font-bold text-slate-900 truncate">Dashboard</h1>
+    <!-- Online indicator -->
+    <div class="flex items-center gap-2 px-3 py-2 mb-4 bg-slate-800/60 rounded-xl">
+        <div class="pulse-dot"></div>
+        <span class="text-[10px] font-bold text-slate-400 uppercase">Firebase Connected</span>
+    </div>
+
+    <p class="text-[9px] font-black uppercase text-slate-600 px-3 mb-2 tracking-widest">Navigasi</p>
+    <nav class="space-y-1">
+        <button onclick="showPage('dashboard')" id="btn-dashboard" class="menu-link active-menu w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i> <span class="font-semibold">Dashboard</span>
+        </button>
+        <button onclick="showPage('inventory')" id="btn-inventory" class="menu-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm">
+            <i data-lucide="database" class="w-4 h-4"></i> <span class="font-semibold">Inventaris Alat</span>
+        </button>
+        <button onclick="showPage('bapeten')" id="btn-bapeten" class="menu-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm">
+            <i data-lucide="shield-check" class="w-4 h-4"></i> <span class="font-semibold">Monitor Bapeten</span>
+            <span id="badge-bapeten" class="ml-auto bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full hidden">0</span>
+        </button>
+        <button onclick="showPage('statistik')" id="btn-statistik" class="menu-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i> <span class="font-semibold">Statistik</span>
+        </button>
+        <button onclick="showPage('logs')" id="btn-logs" class="menu-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm">
+            <i data-lucide="file-clock" class="w-4 h-4"></i> <span class="font-semibold">Audit Trail</span>
+        </button>
+    </nav>
+
+    <div class="mt-auto pt-5 border-t border-slate-800 px-2">
+        <p class="text-[9px] uppercase font-black text-slate-600 mb-2 tracking-widest">Developed By</p>
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-xs font-black">IR</div>
+            <div>
+                <p class="text-xs font-bold text-white leading-none">Ino Rad</p>
+                <p class="text-[9px] text-slate-500 mt-0.5">Radiographer RSMP</p>
             </div>
-            <button onclick="toggleModal('modal-add')" class="bg-blue-600 hover:bg-blue-700 text-white p-2 lg:px-5 lg:py-2.5 rounded-lg lg:rounded-xl text-sm font-bold flex items-center gap-2">
-                <i data-lucide="plus" class="w-5 h-5 lg:w-4 lg:h-4"></i> <span class="hidden lg:inline">Alat Baru</span>
+        </div>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<main class="flex-1 flex flex-col overflow-hidden w-full">
+    
+    <!-- HEADER -->
+    <header class="h-16 bg-white border-b px-4 lg:px-8 flex items-center justify-between shrink-0 shadow-sm">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleSidebar()" class="lg:hidden p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">
+                <i data-lucide="menu" class="w-5 h-5"></i>
             </button>
-        </header>
+            <div>
+                <h1 id="page-title" class="text-base lg:text-lg font-extrabold text-slate-900 leading-none">Dashboard</h1>
+                <p id="page-sub" class="text-[10px] text-slate-400 font-medium mt-0.5 hidden lg:block">Ringkasan sistem inventaris radiologi</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="exportCSV()" title="Export CSV" class="hidden lg:flex items-center gap-2 px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-bold transition-colors">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
+            </button>
+            <button onclick="toggleModal('modal-add')" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-3 py-2 lg:px-5 lg:py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors shadow-sm shadow-blue-200">
+                <i data-lucide="plus" class="w-4 h-4"></i> <span class="hidden lg:inline">Tambah Alat</span>
+            </button>
+        </div>
+    </header>
 
-        <div class="flex-1 overflow-y-auto p-4 lg:p-8 custom-scroll">
-            
-            <div id="page-dashboard" class="page-content space-y-6">
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
-                    <div class="glass-card p-4 lg:p-6 rounded-2xl shadow-sm border-b-4 border-blue-500">
-                        <p class="text-slate-400 text-[9px] font-bold uppercase">Total Unit</p>
-                        <h2 id="stat-total" class="text-2xl lg:text-4xl font-black text-slate-800">0</h2>
+    <!-- CONTENT -->
+    <div class="flex-1 overflow-y-auto p-4 lg:p-8 custom-scroll">
+
+        <!-- DASHBOARD -->
+        <div id="page-dashboard" class="page-content space-y-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
+                <div class="stat-card p-4 lg:p-5 border-t-4 border-blue-500">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Total Unit</p>
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><i data-lucide="cpu" class="w-4 h-4 text-blue-500"></i></div>
                     </div>
-                    <div class="glass-card p-4 lg:p-6 rounded-2xl shadow-sm border-b-4 border-emerald-500">
-                        <p class="text-slate-400 text-[9px] font-bold uppercase">Aktif</p>
-                        <h2 id="stat-aktif" class="text-2xl lg:text-4xl font-black text-emerald-600">0</h2>
-                    </div>
-                    <div class="glass-card p-4 lg:p-6 rounded-2xl shadow-sm border-b-4 border-red-500">
-                        <p class="text-slate-400 text-[9px] font-bold uppercase">Rusak</p>
-                        <h2 id="stat-rusak" class="text-2xl lg:text-4xl font-black text-red-600">0</h2>
-                    </div>
-                    <div class="glass-card p-4 lg:p-6 rounded-2xl shadow-sm border-b-4 border-yellow-500">
-                        <p class="text-slate-400 text-[9px] font-bold uppercase">Bapeten Exp</p>
-                        <h2 id="stat-bapeten" class="text-2xl lg:text-4xl font-black text-yellow-600">0</h2>
-                    </div>
+                    <h2 id="stat-total" class="text-3xl lg:text-4xl font-black text-slate-800">0</h2>
                 </div>
-
-                <div class="glass-card rounded-2xl p-4 lg:p-6">
-                    <h3 class="font-bold text-sm mb-4 flex items-center gap-2"><i data-lucide="alert-circle" class="w-4 h-4 text-yellow-500"></i> Monitoring Bapeten</h3>
-                    <div class="overflow-x-auto custom-scroll">
-                        <table class="w-full text-left min-w-[500px]">
-                            <tbody id="bapeten-monitoring" class="divide-y divide-slate-50">
-                                <tr><td class="py-4 text-xs text-slate-400 italic">Belum ada data...</td></tr>
-                            </tbody>
-                        </table>
+                <div class="stat-card p-4 lg:p-5 border-t-4 border-emerald-500">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Aktif</p>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i></div>
                     </div>
+                    <h2 id="stat-aktif" class="text-3xl lg:text-4xl font-black text-emerald-600">0</h2>
+                </div>
+                <div class="stat-card p-4 lg:p-5 border-t-4 border-red-500">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Rusak</p>
+                        <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center"><i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i></div>
+                    </div>
+                    <h2 id="stat-rusak" class="text-3xl lg:text-4xl font-black text-red-600">0</h2>
+                </div>
+                <div class="stat-card p-4 lg:p-5 border-t-4 border-yellow-500">
+                    <div class="flex items-center justify-between mb-3">
+                        <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Bapeten Exp</p>
+                        <div class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center"><i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-500"></i></div>
+                    </div>
+                    <h2 id="stat-bapeten" class="text-3xl lg:text-4xl font-black text-yellow-600">0</h2>
                 </div>
             </div>
 
-            <div id="page-inventory" class="page-content hidden">
-                <div class="glass-card rounded-2xl overflow-hidden shadow-sm overflow-x-auto custom-scroll">
-                    <table class="w-full text-left min-w-[800px]">
-                        <thead class="bg-slate-50 text-[10px] uppercase tracking-widest font-bold">
+            <!-- Recent + Quick Bapeten -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+                    <h3 class="font-bold text-sm mb-4 flex items-center gap-2 text-slate-800">
+                        <i data-lucide="clock" class="w-4 h-4 text-blue-500"></i> Alat Terbaru Ditambah
+                    </h3>
+                    <div id="recent-list" class="space-y-2">
+                        <p class="text-xs text-slate-400 italic">Belum ada data...</p>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+                    <h3 class="font-bold text-sm mb-4 flex items-center gap-2 text-slate-800">
+                        <i data-lucide="shield-alert" class="w-4 h-4 text-yellow-500"></i> Izin Bapeten Perlu Perhatian
+                    </h3>
+                    <div id="dash-bapeten-alert" class="space-y-2">
+                        <p class="text-xs text-slate-400 italic">Semua izin masih valid.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INVENTORY -->
+        <div id="page-inventory" class="page-content hidden space-y-4">
+            <!-- Search & Filter -->
+            <div class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                    <input id="search-input" type="text" placeholder="Cari nama alat, kode, lokasi..." oninput="filterInventory()" class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                </div>
+                <select id="filter-status" onchange="filterInventory()" class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                    <option value="">Semua Status</option>
+                    <option value="aktif">Aktif</option>
+                    <option value="rusak">Rusak</option>
+                    <option value="maintenance">Maintenance</option>
+                </select>
+                <select id="filter-risiko" onchange="filterInventory()" class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                    <option value="">Semua Risiko</option>
+                    <option value="low">Low Risk</option>
+                    <option value="medium">Medium Risk</option>
+                    <option value="high">High Risk</option>
+                </select>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto custom-scroll">
+                    <table class="w-full text-left min-w-[900px]">
+                        <thead class="bg-slate-50 text-[9px] uppercase tracking-widest font-black text-slate-500">
                             <tr>
-                                <th class="px-6 py-4">ID Inventaris</th>
-                                <th class="px-6 py-4">Alat & Merek</th>
-                                <th class="px-6 py-4">Lokasi</th>
-                                <th class="px-6 py-4">Status</th>
-                                <th class="px-6 py-4">Aksi</th>
+                                <th class="px-5 py-3.5">ID Inventaris</th>
+                                <th class="px-5 py-3.5">Alat & Merek</th>
+                                <th class="px-5 py-3.5">Lokasi</th>
+                                <th class="px-5 py-3.5">Risiko</th>
+                                <th class="px-5 py-3.5">Status</th>
+                                <th class="px-5 py-3.5">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="inventory-table" class="text-sm divide-y divide-slate-100 bg-white"></tbody>
+                        <tbody id="inventory-table" class="text-sm divide-y divide-slate-50 bg-white"></tbody>
+                    </table>
+                </div>
+                <div id="empty-inventory" class="hidden py-16 text-center">
+                    <i data-lucide="inbox" class="w-10 h-10 text-slate-200 mx-auto mb-3"></i>
+                    <p class="text-sm text-slate-400 font-medium">Tidak ada data ditemukan</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- BAPETEN MONITORING -->
+        <div id="page-bapeten" class="page-content hidden">
+            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div class="p-5 border-b bg-yellow-50/50 flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-yellow-100 flex items-center justify-center shrink-0">
+                        <i data-lucide="shield-check" class="w-5 h-5 text-yellow-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-slate-800">Monitor Izin Bapeten</p>
+                        <p class="text-[10px] text-slate-500">Status & masa berlaku izin operasional alat radiologi</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto custom-scroll">
+                    <table class="w-full text-left min-w-[700px]">
+                        <thead class="bg-slate-50 text-[9px] uppercase tracking-widest font-black text-slate-500">
+                            <tr>
+                                <th class="px-5 py-3.5">Nama Alat</th>
+                                <th class="px-5 py-3.5">No. Bapeten</th>
+                                <th class="px-5 py-3.5">Tgl Terbit</th>
+                                <th class="px-5 py-3.5">Tgl Berakhir</th>
+                                <th class="px-5 py-3.5">Sisa Hari</th>
+                                <th class="px-5 py-3.5">Status Izin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bapeten-table" class="text-sm divide-y divide-slate-50 bg-white"></tbody>
                     </table>
                 </div>
             </div>
-
-            <div id="page-logs" class="page-content hidden">
-                <div class="max-w-2xl mx-auto space-y-4" id="log-list"></div>
-            </div>
-
         </div>
-    </main>
 
-    <div id="modal-add" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[150] hidden flex items-center justify-center p-2 lg:p-4">
-        <div class="bg-white rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto custom-scroll">
-            <div class="p-5 lg:p-6 border-b flex justify-between items-center sticky top-0 bg-white">
-                <h3 class="font-bold text-lg">Input Alat Radiologi</h3>
-                <button onclick="toggleModal('modal-add')" class="p-2"><i data-lucide="x"></i></button>
+        <!-- STATISTIK -->
+        <div id="page-statistik" class="page-content hidden space-y-5">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+                    <h3 class="font-bold text-sm mb-5 text-slate-800 flex items-center gap-2">
+                        <i data-lucide="pie-chart" class="w-4 h-4 text-blue-500"></i> Distribusi Status Alat
+                    </h3>
+                    <div id="chart-status" class="space-y-3"></div>
+                </div>
+                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+                    <h3 class="font-bold text-sm mb-5 text-slate-800 flex items-center gap-2">
+                        <i data-lucide="alert-octagon" class="w-4 h-4 text-orange-500"></i> Distribusi Tingkat Risiko
+                    </h3>
+                    <div id="chart-risiko" class="space-y-3"></div>
+                </div>
+                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm lg:col-span-2">
+                    <h3 class="font-bold text-sm mb-5 text-slate-800 flex items-center gap-2">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-purple-500"></i> Alat per Lokasi
+                    </h3>
+                    <div id="chart-lokasi" class="space-y-3"></div>
+                </div>
             </div>
-            
-            <form id="form-add-equipment" class="p-5 lg:p-6 space-y-4">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">No. Inventaris (Auto)</label>
-                        <input name="kode" id="auto-kode" type="text" readonly class="w-full px-4 py-2.5 bg-slate-100 rounded-xl font-mono text-blue-600 font-bold outline-none">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Nama Alat</label>
-                        <input name="nama" type="text" required class="w-full px-4 py-2.5 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                </div>
+        </div>
 
+        <!-- AUDIT TRAIL -->
+        <div id="page-logs" class="page-content hidden">
+            <div class="max-w-2xl mx-auto space-y-3" id="log-list">
+                <div class="text-center py-8">
+                    <i data-lucide="loader" class="w-6 h-6 text-slate-300 mx-auto animate-spin"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- MODAL TAMBAH -->
+<div id="modal-add" class="fixed inset-0 modal-overlay z-[150] hidden flex items-center justify-center p-3">
+    <div class="modal-box bg-white shadow-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto custom-scroll">
+        <div class="p-5 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-3xl z-10">
+            <div>
+                <h3 class="font-extrabold text-base text-slate-900">Input Alat Radiologi</h3>
+                <p class="text-[10px] text-slate-400 mt-0.5">Isi semua field yang diperlukan</p>
+            </div>
+            <button onclick="toggleModal('modal-add')" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+        
+        <form id="form-add-equipment" class="p-5 space-y-4">
+            <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Merek / Tipe</label>
-                    <input name="merk_type" type="text" required class="w-full px-4 py-2.5 border rounded-xl outline-none">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">No. Inventaris</label>
+                    <input name="kode" id="auto-kode" type="text" readonly class="w-full px-3 py-2.5 bg-slate-100 rounded-xl font-mono text-blue-600 font-bold text-sm outline-none">
                 </div>
-
-                <div class="p-4 bg-yellow-50 rounded-xl border border-yellow-100 space-y-3">
-                    <p class="text-[10px] font-bold text-yellow-700 uppercase tracking-wider">Informasi Bapeten</p>
-                    <input id="input-no-bapeten" name="no_bapeten" type="text" placeholder="Nomor Bapeten" class="w-full px-4 py-2 border border-yellow-200 rounded-lg text-sm">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input id="tgl-terbit" name="tgl_terbit" type="date" disabled class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-xs">
-                        <input id="tgl-berakhir" name="tgl_berakhir" type="date" disabled class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-xs">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Lokasi</label>
-                        <input name="lokasi" type="text" required class="w-full px-4 py-2.5 border rounded-xl">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Risiko</label>
-                        <select name="risiko" class="w-full px-4 py-2.5 border rounded-xl">
-                            <option value="low">Low Risk</option>
-                            <option value="medium">Medium Risk</option>
-                            <option value="high">High Risk</option>
-                        </select>
-                    </div>
-                </div>
-
                 <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Link Google Drive</label>
-                    <input name="link_file" type="url" placeholder="https://drive.google.com/..." class="w-full px-4 py-2.5 border rounded-xl text-sm">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Nama Alat *</label>
+                    <input name="nama" type="text" required placeholder="Nama alat" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
+            </div>
 
-                <button type="submit" class="w-full py-4 bg-slate-900 text-white font-bold rounded-xl mt-4">SIMPAN DATA</button>
-            </form>
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Merek / Tipe *</label>
+                <input name="merk_type" type="text" required placeholder="Contoh: Siemens SOMATOM" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="p-4 bg-yellow-50 rounded-xl border border-yellow-200 space-y-3">
+                <p class="text-[10px] font-black text-yellow-700 uppercase tracking-widest flex items-center gap-1.5">
+                    <i data-lucide="shield" class="w-3 h-3"></i> Informasi Bapeten
+                </p>
+                <input id="input-no-bapeten" name="no_bapeten" type="text" placeholder="Nomor Izin Bapeten" class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white">
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-bold text-yellow-700 uppercase">Tgl Terbit</label>
+                        <input id="tgl-terbit" name="tgl_terbit" type="date" disabled class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white disabled:opacity-50">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-bold text-yellow-700 uppercase">Tgl Berakhir</label>
+                        <input id="tgl-berakhir" name="tgl_berakhir" type="date" disabled class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white disabled:opacity-50">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Lokasi *</label>
+                    <input name="lokasi" type="text" required placeholder="Ruang / Gedung" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Tingkat Risiko</label>
+                    <select name="risiko" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="low">Low Risk</option>
+                        <option value="medium">Medium Risk</option>
+                        <option value="high">High Risk</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Tahun Pengadaan</label>
+                <input name="tahun_pengadaan" type="number" placeholder="2024" min="1990" max="2099" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Catatan / Keterangan</label>
+                <textarea name="catatan" rows="2" placeholder="Catatan tambahan (opsional)..." class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Link Google Drive / Dokumen</label>
+                <input name="link_file" type="url" placeholder="https://drive.google.com/..." class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <button type="submit" id="btn-simpan" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+                <i data-lucide="save" class="w-4 h-4"></i> SIMPAN DATA
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL EDIT -->
+<div id="modal-edit" class="fixed inset-0 modal-overlay z-[150] hidden flex items-center justify-center p-3">
+    <div class="modal-box bg-white shadow-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto custom-scroll">
+        <div class="p-5 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-3xl z-10">
+            <div>
+                <h3 class="font-extrabold text-base text-slate-900">Edit Data Alat</h3>
+                <p class="text-[10px] text-slate-400 mt-0.5" id="edit-kode-label">—</p>
+            </div>
+            <button onclick="toggleModal('modal-edit')" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+        <form id="form-edit-equipment" class="p-5 space-y-4">
+            <input type="hidden" id="edit-id">
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase">Nama Alat *</label>
+                <input id="edit-nama" type="text" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase">Merek / Tipe *</label>
+                <input id="edit-merk" type="text" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase">Lokasi *</label>
+                    <input id="edit-lokasi" type="text" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase">Status *</label>
+                    <select id="edit-status" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="aktif">Aktif</option>
+                        <option value="rusak">Rusak</option>
+                        <option value="maintenance">Maintenance</option>
+                    </select>
+                </div>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase">Tingkat Risiko</label>
+                <select id="edit-risiko" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option value="low">Low Risk</option>
+                    <option value="medium">Medium Risk</option>
+                    <option value="high">High Risk</option>
+                </select>
+            </div>
+            <div class="p-4 bg-yellow-50 rounded-xl border border-yellow-200 space-y-3">
+                <p class="text-[10px] font-black text-yellow-700 uppercase tracking-widest">Informasi Bapeten</p>
+                <input id="edit-no-bapeten" type="text" placeholder="No. Bapeten" class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-sm bg-white focus:outline-none">
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="edit-tgl-terbit" type="date" class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-xs bg-white">
+                    <input id="edit-tgl-berakhir" type="date" class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-xs bg-white">
+                </div>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase">Catatan</label>
+                <textarea id="edit-catatan" rows="2" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-slate-400 uppercase">Link Dokumen</label>
+                <input id="edit-link" type="url" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+                <i data-lucide="save" class="w-4 h-4"></i> SIMPAN PERUBAHAN
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL DETAIL -->
+<div id="modal-detail" class="fixed inset-0 modal-overlay z-[150] hidden flex items-center justify-center p-3">
+    <div class="modal-box bg-white shadow-2xl w-full max-w-md max-h-[95vh] overflow-y-auto custom-scroll">
+        <div class="p-5 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-3xl z-10">
+            <h3 class="font-extrabold text-base text-slate-900">Detail Alat</h3>
+            <button onclick="toggleModal('modal-detail')" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+        <div id="detail-content" class="p-5 space-y-3 text-sm"></div>
+    </div>
+</div>
+
+<!-- MODAL KONFIRMASI HAPUS -->
+<div id="modal-delete" class="fixed inset-0 modal-overlay z-[200] hidden flex items-center justify-center p-3">
+    <div class="modal-box bg-white shadow-2xl w-full max-w-sm p-6 text-center">
+        <div class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="trash-2" class="w-7 h-7 text-red-500"></i>
+        </div>
+        <h3 class="font-extrabold text-lg text-slate-900 mb-1">Hapus Alat?</h3>
+        <p class="text-sm text-slate-500 mb-6" id="delete-confirm-text">Data ini akan dihapus permanen.</p>
+        <div class="flex gap-3">
+            <button onclick="toggleModal('modal-delete')" class="flex-1 py-3 border border-slate-200 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors">Batal</button>
+            <button id="btn-confirm-delete" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm transition-colors">Hapus</button>
         </div>
     </div>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<!-- FIREBASE -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, push, set, update, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyC9vzs1ddViMPx4DtfK2ny2v5booWJGEZA",
-            authDomain: "inventaris-alat-rad.firebaseapp.com",
-            databaseURL: "https://inventaris-alat-rad-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "inventaris-alat-rad",
-            storageBucket: "inventaris-alat-rad.firebasestorage.app",
-            messagingSenderId: "273303382914",
-            appId: "1:273303382914:web:2db485573f130636513d9b"
+    const firebaseConfig = {
+        apiKey: "AIzaSyC9vzs1ddViMPx4DtfK2ny2v5booWJGEZA",
+        authDomain: "inventaris-alat-rad.firebaseapp.com",
+        databaseURL: "https://inventaris-alat-rad-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "inventaris-alat-rad",
+        storageBucket: "inventaris-alat-rad.firebasestorage.app",
+        messagingSenderId: "273303382914",
+        appId: "1:273303382914:web:2db485573f130636513d9b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const eqRef = ref(db, 'equipment');
+    const logRef = ref(db, 'logs');
+
+    let eqData = {};
+    window._db = db;
+    window._eqRef = eqRef;
+    window._logRef = logRef;
+    window._pushFn = push;
+    window._setFn = set;
+    window._updateFn = update;
+    window._removeFn = remove;
+    window._refFn = ref;
+    window._serverTimestamp = serverTimestamp;
+
+    onValue(eqRef, (snapshot) => {
+        eqData = snapshot.val() || {};
+        window._eqData = eqData;
+        const count = Object.keys(eqData).length + 1;
+        document.getElementById('auto-kode').value = `RSMP-RAD-${String(count).padStart(3, '0')}`;
+        renderAll();
+    });
+
+    onValue(logRef, (snapshot) => renderLogs(snapshot.val()));
+
+    function renderAll() {
+        const items = Object.entries(eqData).map(([id, v]) => ({ id, ...v }));
+        
+        // Stats
+        document.getElementById('stat-total').innerText = items.length;
+        document.getElementById('stat-aktif').innerText = items.filter(i => i.status === 'aktif').length;
+        document.getElementById('stat-rusak').innerText = items.filter(i => i.status === 'rusak').length;
+
+        // Bapeten countdown
+        const today = new Date(); today.setHours(0,0,0,0);
+        const bapetenItems = items.filter(i => i.no_bapeten && i.tgl_berakhir);
+        const alertBapeten = bapetenItems.filter(i => {
+            const exp = new Date(i.tgl_berakhir);
+            const diff = Math.ceil((exp - today) / 86400000);
+            return diff <= 90;
+        });
+        document.getElementById('stat-bapeten').innerText = alertBapeten.length;
+        
+        // Badge sidebar
+        const badge = document.getElementById('badge-bapeten');
+        if (alertBapeten.length > 0) {
+            badge.textContent = alertBapeten.length;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+
+        renderInventoryTable(items);
+        renderBapetenTable(bapetenItems, today);
+        renderDashboardWidgets(items, alertBapeten, today);
+        renderStatistik(items);
+        lucide.createIcons();
+    }
+
+    function getBapetenClass(days) {
+        if (days < 0) return 'exp-expired';
+        if (days <= 30) return 'exp-danger';
+        if (days <= 90) return 'exp-warn';
+        return 'exp-ok';
+    }
+    function getBapetenLabel(days) {
+        if (days < 0) return 'Expired';
+        if (days <= 30) return 'Kritis';
+        if (days <= 90) return 'Perhatian';
+        return 'Valid';
+    }
+
+    window._renderAll = renderAll;
+
+    function renderInventoryTable(items) {
+        const search = (document.getElementById('search-input')?.value || '').toLowerCase();
+        const filterStatus = document.getElementById('filter-status')?.value || '';
+        const filterRisiko = document.getElementById('filter-risiko')?.value || '';
+        
+        let filtered = items;
+        if (search) filtered = filtered.filter(i => 
+            (i.nama||'').toLowerCase().includes(search) ||
+            (i.kode||'').toLowerCase().includes(search) ||
+            (i.lokasi||'').toLowerCase().includes(search) ||
+            (i.merk_type||'').toLowerCase().includes(search)
+        );
+        if (filterStatus) filtered = filtered.filter(i => i.status === filterStatus);
+        if (filterRisiko) filtered = filtered.filter(i => i.risiko === filterRisiko);
+
+        const risikoMap = {
+            low: '<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-100 text-emerald-600">Low</span>',
+            medium: '<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-orange-100 text-orange-600">Medium</span>',
+            high: '<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-red-100 text-red-600">High</span>'
+        };
+        const statusMap = {
+            aktif: 'badge-aktif',
+            rusak: 'badge-rusak',
+            maintenance: 'badge-maintenance'
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const eqRef = ref(db, 'equipment');
-        const logRef = ref(db, 'logs');
-
-        let eqData = {};
-
-        onValue(eqRef, (snapshot) => {
-            eqData = snapshot.val() || {};
-            const count = Object.keys(eqData).length + 1;
-            document.getElementById('auto-kode').value = `RSMP-RAD-${String(count).padStart(3, '0')}`;
-            renderUI();
-        });
-
-        onValue(logRef, (snapshot) => renderLogs(snapshot.val()));
-
-        function renderUI() {
-            const items = Object.values(eqData);
-            document.getElementById('stat-total').innerText = items.length;
-            document.getElementById('stat-aktif').innerText = items.filter(i => i.status === 'aktif').length;
-            document.getElementById('stat-rusak').innerText = items.filter(i => i.status === 'rusak').length;
-            
-            // Render Table
-            const table = document.getElementById('inventory-table');
-            table.innerHTML = items.map(eq => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-6 py-4 font-mono font-bold text-blue-600">${eq.kode}</td>
-                    <td class="px-6 py-4">
-                        <p class="font-bold">${eq.nama}</p>
-                        <p class="text-[10px] text-slate-400 uppercase">${eq.merk_type}</p>
+        const table = document.getElementById('inventory-table');
+        const empty = document.getElementById('empty-inventory');
+        
+        if (filtered.length === 0) {
+            table.innerHTML = '';
+            empty.classList.remove('hidden');
+        } else {
+            empty.classList.add('hidden');
+            table.innerHTML = filtered.map(eq => `
+                <tr class="inv-row cursor-pointer" onclick="showDetail('${eq.id}')">
+                    <td class="px-5 py-3.5"><span class="font-mono font-bold text-blue-600 text-xs">${eq.kode||'—'}</span></td>
+                    <td class="px-5 py-3.5">
+                        <p class="font-bold text-slate-800 text-sm leading-none">${eq.nama||'—'}</p>
+                        <p class="text-[10px] text-slate-400 uppercase mt-0.5">${eq.merk_type||'—'}</p>
                     </td>
-                    <td class="px-6 py-4 text-xs font-medium">${eq.lokasi}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-1 rounded-full text-[9px] font-black uppercase ${eq.status === 'aktif' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}">${eq.status}</span>
+                    <td class="px-5 py-3.5 text-xs font-medium text-slate-600">${eq.lokasi||'—'}</td>
+                    <td class="px-5 py-3.5">${risikoMap[eq.risiko] || risikoMap.low}</td>
+                    <td class="px-5 py-3.5">
+                        <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${statusMap[eq.status] || 'badge-aktif'}">${eq.status||'aktif'}</span>
                     </td>
-                    <td class="px-6 py-4">
-                        <div class="flex gap-2">
-                            ${eq.link_file ? `<a href="${eq.link_file}" target="_blank" class="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"><i data-lucide="external-link" class="w-4 h-4"></i></a>` : ''}
+                    <td class="px-5 py-3.5" onclick="event.stopPropagation()">
+                        <div class="flex items-center gap-1">
+                            ${eq.link_file ? `<a href="${eq.link_file}" target="_blank" title="Lihat Dokumen" class="w-7 h-7 flex items-center justify-center text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>` : ''}
+                            <button onclick="openEdit('${eq.id}')" title="Edit" class="w-7 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="confirmDelete('${eq.id}', '${(eq.nama||'').replace(/'/g,"\\'")}');" title="Hapus" class="w-7 h-7 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                         </div>
                     </td>
                 </tr>
             `).join('');
-
-            // Bapeten List
-            const bapetenList = document.getElementById('bapeten-monitoring');
-            bapetenList.innerHTML = items.filter(i => i.no_bapeten).map(i => `
-                <tr>
-                    <td class="py-3 text-xs font-bold">${i.nama}</td>
-                    <td class="py-3 text-[10px] text-slate-500">${i.no_bapeten}</td>
-                    <td class="py-3 text-[10px] font-mono">${i.tgl_berakhir}</td>
-                </tr>
-            `).join('') || '<tr><td colspan="3" class="py-4 text-xs italic text-slate-400">Tidak ada data izin.</td></tr>';
-
-            lucide.createIcons();
         }
+        lucide.createIcons();
+    }
 
-        function renderLogs(data) {
-            const container = document.getElementById('log-list');
-            if(!data) return;
-            container.innerHTML = Object.values(data).reverse().slice(0, 10).map(log => `
-                <div class="bg-white border p-4 rounded-xl shadow-sm">
-                    <div class="flex justify-between text-[10px] font-bold mb-1">
-                        <span class="text-blue-600">${log.user}</span>
-                        <span class="text-slate-400">${new Date(log.waktu).toLocaleString('id-ID')}</span>
+    function renderBapetenTable(items, today) {
+        const tbody = document.getElementById('bapeten-table');
+        if (items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-8 text-center text-xs text-slate-400 italic">Tidak ada alat dengan data izin Bapeten.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = items.map(i => {
+            const exp = new Date(i.tgl_berakhir);
+            const days = Math.ceil((exp - today) / 86400000);
+            const cls = getBapetenClass(days);
+            const lbl = getBapetenLabel(days);
+            return `<tr class="inv-row">
+                <td class="px-5 py-3.5 font-bold text-sm text-slate-800">${i.nama}</td>
+                <td class="px-5 py-3.5 font-mono text-xs text-slate-600">${i.no_bapeten}</td>
+                <td class="px-5 py-3.5 text-xs text-slate-500">${i.tgl_terbit||'—'}</td>
+                <td class="px-5 py-3.5 text-xs font-mono text-slate-700 font-bold">${i.tgl_berakhir}</td>
+                <td class="px-5 py-3.5 text-xs font-bold ${days < 0 ? 'text-slate-400' : days <= 30 ? 'text-red-600' : days <= 90 ? 'text-yellow-600' : 'text-emerald-600'}">${days < 0 ? 'Lewat' : days + ' hari'}</td>
+                <td class="px-5 py-3.5"><span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${cls}">${lbl}</span></td>
+            </tr>`;
+        }).join('');
+    }
+
+    function renderDashboardWidgets(items, alertBapeten, today) {
+        // Recent items
+        const sorted = [...items].sort((a,b) => (b.created_at||0) - (a.created_at||0)).slice(0,5);
+        const recentEl = document.getElementById('recent-list');
+        recentEl.innerHTML = sorted.length === 0 ? '<p class="text-xs text-slate-400 italic">Belum ada data...</p>' :
+            sorted.map(i => `
+                <div class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
+                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                        <i data-lucide="cpu" class="w-4 h-4 text-blue-500"></i>
                     </div>
-                    <p class="text-xs text-slate-600">${log.aksi}</p>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-slate-800 truncate">${i.nama}</p>
+                        <p class="text-[10px] text-slate-400">${i.lokasi} • ${i.kode}</p>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${i.status==='aktif'?'badge-aktif':i.status==='rusak'?'badge-rusak':'badge-maintenance'}">${i.status||'aktif'}</span>
+                </div>
+            `).join('');
+
+        // Alert bapeten on dashboard
+        const alertEl = document.getElementById('dash-bapeten-alert');
+        if (alertBapeten.length === 0) {
+            alertEl.innerHTML = '<p class="text-xs text-emerald-600 font-medium flex items-center gap-1.5"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Semua izin masih valid.</p>';
+        } else {
+            alertEl.innerHTML = alertBapeten.slice(0,5).map(i => {
+                const days = Math.ceil((new Date(i.tgl_berakhir) - today) / 86400000);
+                return `<div class="flex items-center justify-between p-2.5 rounded-xl ${days < 0 ? 'bg-slate-50' : days <= 30 ? 'bg-red-50' : 'bg-yellow-50'}">
+                    <div>
+                        <p class="text-xs font-bold text-slate-800">${i.nama}</p>
+                        <p class="text-[10px] text-slate-500">${i.tgl_berakhir}</p>
+                    </div>
+                    <span class="text-[9px] font-black uppercase px-2 py-1 rounded-full ${days < 0 ? 'bg-slate-200 text-slate-500' : days <= 30 ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-700'}">${days < 0 ? 'Expired' : days + 'h lagi'}</span>
+                </div>`;
+            }).join('');
+        }
+        lucide.createIcons();
+    }
+
+    function renderStatistik(items) {
+        function drawBar(containerId, dataMap, colorMap) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            const total = Object.values(dataMap).reduce((a,b) => a+b, 0);
+            if (total === 0) { el.innerHTML = '<p class="text-xs text-slate-400 italic">Belum ada data</p>'; return; }
+            el.innerHTML = Object.entries(dataMap).map(([k,v]) => `
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold text-slate-700 capitalize">${k}</span>
+                        <span class="text-xs text-slate-500 font-mono">${v} unit (${Math.round(v/total*100)}%)</span>
+                    </div>
+                    <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="bar-fill h-full rounded-full ${colorMap[k] || 'bg-blue-500'}" style="width: ${Math.round(v/total*100)}%"></div>
+                    </div>
                 </div>
             `).join('');
         }
 
-        document.getElementById('form-add-equipment').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const f = new FormData(e.target);
-            const data = {
-                kode: f.get('kode'), nama: f.get('nama'), merk_type: f.get('merk_type'),
-                no_bapeten: f.get('no_bapeten'), tgl_terbit: f.get('tgl_terbit'),
-                tgl_berakhir: f.get('tgl_berakhir'), lokasi: f.get('lokasi'),
-                risiko: f.get('risiko'), link_file: f.get('link_file'),
-                status: 'aktif', created_at: serverTimestamp()
-            };
-            await set(push(eqRef), data);
-            await push(logRef, { user: 'Ino Rad', aksi: `Tambah ${data.nama}`, waktu: Date.now() });
-            toggleModal('modal-add');
-            e.target.reset();
-            alert('Berhasil!');
+        const statusCount = { aktif: 0, rusak: 0, maintenance: 0 };
+        const risikoCount = { low: 0, medium: 0, high: 0 };
+        const lokasiCount = {};
+        items.forEach(i => {
+            statusCount[i.status] = (statusCount[i.status]||0) + 1;
+            risikoCount[i.risiko] = (risikoCount[i.risiko]||0) + 1;
+            const lok = i.lokasi || 'Tidak diketahui';
+            lokasiCount[lok] = (lokasiCount[lok]||0) + 1;
         });
 
-        document.getElementById('input-no-bapeten').oninput = (e) => {
-            const disabled = !e.target.value.trim();
-            document.getElementById('tgl-terbit').disabled = disabled;
-            document.getElementById('tgl-berakhir').disabled = disabled;
-        };
-    </script>
+        drawBar('chart-status', statusCount, { aktif: 'bg-emerald-500', rusak: 'bg-red-500', maintenance: 'bg-yellow-500' });
+        drawBar('chart-risiko', risikoCount, { low: 'bg-emerald-500', medium: 'bg-orange-400', high: 'bg-red-500' });
+        drawBar('chart-lokasi', lokasiCount, {});
+    }
 
-    <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('overlay').classList.toggle('show');
-        }
-        function showPage(pageId) {
-            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-            document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active-menu'));
-            document.getElementById('page-' + pageId).classList.remove('hidden');
-            document.getElementById('btn-' + pageId).classList.add('active-menu');
-            document.getElementById('page-title').innerText = pageId.charAt(0).toUpperCase() + pageId.slice(1);
-            if(window.innerWidth < 1024) toggleSidebar();
-            lucide.createIcons();
-        }
-        function toggleModal(id) {
-            document.getElementById(id).classList.toggle('hidden');
-        }
+    function renderLogs(data) {
+        const container = document.getElementById('log-list');
+        if (!data) { container.innerHTML = '<p class="text-center text-xs text-slate-400 italic py-8">Belum ada log aktivitas.</p>'; return; }
+        const logItems = Object.values(data).reverse().slice(0, 20);
+        container.innerHTML = logItems.map(log => {
+            const ico = log.aksi?.startsWith('Tambah') ? 'plus-circle' : log.aksi?.startsWith('Edit') ? 'pencil' : log.aksi?.startsWith('Hapus') ? 'trash-2' : 'activity';
+            const col = log.aksi?.startsWith('Tambah') ? 'text-emerald-500' : log.aksi?.startsWith('Hapus') ? 'text-red-500' : 'text-blue-500';
+            return `<div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm flex gap-3 items-start">
+                <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <i data-lucide="${ico}" class="w-3.5 h-3.5 ${col}"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-start gap-2">
+                        <span class="text-[10px] font-black text-blue-600">${log.user}</span>
+                        <span class="text-[9px] text-slate-400 shrink-0 font-mono">${new Date(log.waktu).toLocaleString('id-ID')}</span>
+                    </div>
+                    <p class="text-xs text-slate-600 mt-0.5">${log.aksi}</p>
+                </div>
+            </div>`;
+        }).join('');
         lucide.createIcons();
-    </script>
+    }
+
+    // FORM ADD
+    document.getElementById('form-add-equipment').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btn-simpan');
+        btn.disabled = true; btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Menyimpan...';
+        lucide.createIcons();
+        const f = new FormData(e.target);
+        const data = {
+            kode: f.get('kode'), nama: f.get('nama'), merk_type: f.get('merk_type'),
+            no_bapeten: f.get('no_bapeten') || '', tgl_terbit: f.get('tgl_terbit') || '',
+            tgl_berakhir: f.get('tgl_berakhir') || '', lokasi: f.get('lokasi'),
+            risiko: f.get('risiko'), link_file: f.get('link_file') || '',
+            tahun_pengadaan: f.get('tahun_pengadaan') || '',
+            catatan: f.get('catatan') || '',
+            status: 'aktif', created_at: Date.now()
+        };
+        try {
+            await window._setFn(window._pushFn(window._eqRef), data);
+            await window._setFn(window._pushFn(window._logRef), { user: 'Ino Rad', aksi: `Tambah ${data.nama}`, waktu: Date.now() });
+            toggleModal('modal-add');
+            e.target.reset();
+            showToast('Alat berhasil ditambahkan!', 'success');
+        } catch(err) {
+            showToast('Gagal menyimpan: ' + err.message, 'error');
+        }
+        btn.disabled = false; btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> SIMPAN DATA';
+        lucide.createIcons();
+    });
+
+    // FORM EDIT
+    document.getElementById('form-edit-equipment').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('edit-id').value;
+        const data = {
+            nama: document.getElementById('edit-nama').value,
+            merk_type: document.getElementById('edit-merk').value,
+            lokasi: document.getElementById('edit-lokasi').value,
+            status: document.getElementById('edit-status').value,
+            risiko: document.getElementById('edit-risiko').value,
+            no_bapeten: document.getElementById('edit-no-bapeten').value,
+            tgl_terbit: document.getElementById('edit-tgl-terbit').value,
+            tgl_berakhir: document.getElementById('edit-tgl-berakhir').value,
+            catatan: document.getElementById('edit-catatan').value,
+            link_file: document.getElementById('edit-link').value,
+        };
+        try {
+            await window._updateFn(window._refFn(window._db, `equipment/${id}`), data);
+            await window._setFn(window._pushFn(window._logRef), { user: 'Ino Rad', aksi: `Edit ${data.nama}`, waktu: Date.now() });
+            toggleModal('modal-edit');
+            showToast('Data berhasil diperbarui!', 'success');
+        } catch(err) {
+            showToast('Gagal update: ' + err.message, 'error');
+        }
+    });
+
+    // OPEN EDIT
+    window.openEdit = function(id) {
+        const eq = window._eqData[id];
+        if (!eq) return;
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-kode-label').textContent = eq.kode || '';
+        document.getElementById('edit-nama').value = eq.nama || '';
+        document.getElementById('edit-merk').value = eq.merk_type || '';
+        document.getElementById('edit-lokasi').value = eq.lokasi || '';
+        document.getElementById('edit-status').value = eq.status || 'aktif';
+        document.getElementById('edit-risiko').value = eq.risiko || 'low';
+        document.getElementById('edit-no-bapeten').value = eq.no_bapeten || '';
+        document.getElementById('edit-tgl-terbit').value = eq.tgl_terbit || '';
+        document.getElementById('edit-tgl-berakhir').value = eq.tgl_berakhir || '';
+        document.getElementById('edit-catatan').value = eq.catatan || '';
+        document.getElementById('edit-link').value = eq.link_file || '';
+        toggleModal('modal-edit');
+    };
+
+    // CONFIRM DELETE
+    window.confirmDelete = function(id, nama) {
+        document.getElementById('delete-confirm-text').textContent = `"${nama}" akan dihapus permanen dari sistem.`;
+        document.getElementById('btn-confirm-delete').onclick = async () => {
+            try {
+                await window._removeFn(window._refFn(window._db, `equipment/${id}`));
+                await window._setFn(window._pushFn(window._logRef), { user: 'Ino Rad', aksi: `Hapus ${nama}`, waktu: Date.now() });
+                toggleModal('modal-delete');
+                showToast('Data berhasil dihapus.', 'info');
+            } catch(err) {
+                showToast('Gagal hapus: ' + err.message, 'error');
+            }
+        };
+        toggleModal('modal-delete');
+    };
+
+    // SHOW DETAIL
+    window.showDetail = function(id) {
+        const eq = window._eqData[id];
+        if (!eq) return;
+        const risikoColor = { low: 'text-emerald-600', medium: 'text-orange-500', high: 'text-red-600' };
+        document.getElementById('detail-content').innerHTML = `
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center">
+                    <i data-lucide="cpu" class="w-6 h-6 text-blue-500"></i>
+                </div>
+                <div>
+                    <p class="font-extrabold text-base text-slate-900">${eq.nama}</p>
+                    <p class="text-[10px] text-slate-400 uppercase">${eq.merk_type}</p>
+                </div>
+            </div>
+            <hr class="border-slate-100 my-3">
+            ${row('No. Inventaris', `<span class="font-mono font-bold text-blue-600">${eq.kode}</span>`)}
+            ${row('Lokasi', eq.lokasi)}
+            ${row('Status', `<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${eq.status==='aktif'?'badge-aktif':eq.status==='rusak'?'badge-rusak':'badge-maintenance'}">${eq.status||'aktif'}</span>`)}
+            ${row('Risiko', `<span class="font-bold ${risikoColor[eq.risiko]||''} capitalize">${eq.risiko||'low'}</span>`)}
+            ${eq.tahun_pengadaan ? row('Tahun Pengadaan', eq.tahun_pengadaan) : ''}
+            ${eq.no_bapeten ? `<hr class="border-slate-100 my-2"><p class="text-[10px] font-black text-yellow-600 uppercase mb-2">Informasi Bapeten</p>
+                ${row('No. Bapeten', eq.no_bapeten)}
+                ${eq.tgl_terbit ? row('Tgl Terbit', eq.tgl_terbit) : ''}
+                ${eq.tgl_berakhir ? row('Tgl Berakhir', eq.tgl_berakhir) : ''}` : ''}
+            ${eq.catatan ? `<hr class="border-slate-100 my-2">${row('Catatan', eq.catatan)}` : ''}
+            ${eq.link_file ? `<hr class="border-slate-100 my-2"><a href="${eq.link_file}" target="_blank" class="flex items-center gap-2 text-blue-600 font-bold text-xs hover:underline"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> Lihat Dokumen</a>` : ''}
+        `;
+        toggleModal('modal-detail');
+        lucide.createIcons();
+    };
+
+    function row(label, value) {
+        return `<div class="flex items-start gap-2 py-1.5">
+            <p class="text-[10px] font-black text-slate-400 uppercase w-28 shrink-0 mt-0.5">${label}</p>
+            <p class="text-xs text-slate-700 font-medium">${value || '—'}</p>
+        </div>`;
+    }
+
+    // EXPORT CSV
+    window.exportCSV = function() {
+        const items = Object.values(window._eqData || {});
+        if (items.length === 0) { showToast('Tidak ada data untuk diexport.', 'error'); return; }
+        const headers = ['Kode','Nama','Merek/Tipe','Lokasi','Status','Risiko','No. Bapeten','Tgl Terbit','Tgl Berakhir','Tahun Pengadaan','Catatan'];
+        const rows = items.map(i => [
+            i.kode, i.nama, i.merk_type, i.lokasi, i.status, i.risiko,
+            i.no_bapeten, i.tgl_terbit, i.tgl_berakhir, i.tahun_pengadaan, i.catatan
+        ].map(v => `"${(v||'').replace(/"/g,'""')}"`).join(','));
+        const csv = [headers.join(','), ...rows].join('\n');
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `RSMP_Radiologi_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click(); URL.revokeObjectURL(url);
+        showToast('Export CSV berhasil!', 'success');
+    };
+
+    // FILTER
+    window.filterInventory = function() {
+        renderInventoryTable(Object.entries(window._eqData||{}).map(([id,v])=>({id,...v})));
+    };
+
+    // BAPETEN DATE UNLOCK
+    document.getElementById('input-no-bapeten').oninput = (e) => {
+        const d = !e.target.value.trim();
+        document.getElementById('tgl-terbit').disabled = d;
+        document.getElementById('tgl-berakhir').disabled = d;
+    };
+</script>
+
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('show');
+    }
+
+    const pageTitles = {
+        dashboard: ['Dashboard', 'Ringkasan sistem inventaris radiologi'],
+        inventory: ['Inventaris Alat', 'Daftar lengkap semua peralatan radiologi'],
+        bapeten: ['Monitor Bapeten', 'Status & masa berlaku izin operasional'],
+        statistik: ['Statistik', 'Analisis & distribusi data inventaris'],
+        logs: ['Audit Trail', 'Riwayat aktivitas sistem'],
+    };
+
+    function showPage(pageId) {
+        document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.menu-link').forEach(l => {
+            l.classList.remove('active-menu');
+            l.style.color = '';
+        });
+        const pg = document.getElementById('page-' + pageId);
+        if (pg) pg.classList.remove('hidden');
+        const btn = document.getElementById('btn-' + pageId);
+        if (btn) btn.classList.add('active-menu');
+        const [title, sub] = pageTitles[pageId] || [pageId, ''];
+        document.getElementById('page-title').innerText = title;
+        const subEl = document.getElementById('page-sub');
+        if (subEl) subEl.innerText = sub;
+        if (window.innerWidth < 1024) toggleSidebar();
+        lucide.createIcons();
+    }
+
+    function toggleModal(id) {
+        const el = document.getElementById(id);
+        el.classList.toggle('hidden');
+    }
+
+    function showToast(msg, type = 'info') {
+        const icons = { success: 'check-circle', error: 'x-circle', info: 'info' };
+        const div = document.createElement('div');
+        div.className = `toast toast-${type}`;
+        div.innerHTML = `<i data-lucide="${icons[type]}" class="w-4 h-4 shrink-0"></i><span>${msg}</span>`;
+        document.getElementById('toast-container').appendChild(div);
+        lucide.createIcons();
+        setTimeout(() => {
+            div.style.opacity = '0'; div.style.transition = 'opacity 0.3s';
+            setTimeout(() => div.remove(), 300);
+        }, 3000);
+    }
+
+    lucide.createIcons();
+</script>
 </body>
 </html>
