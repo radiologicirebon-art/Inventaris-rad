@@ -7,22 +7,59 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☢️</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
+        /* ===================== DESIGN TOKENS ===================== */
         :root {
-            --sidebar-bg: #0a0f1e;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59,130,246,0.25);
+            --c1: #f58320;   /* orange primary */
+            --c2: #119c9f;   /* teal dark */
+            --c3: #7fb9c0;   /* teal light */
+            --c4: #f5a45a;   /* orange light */
+            --c5: #54b0b2;   /* teal mid */
+            --c6: #3ea4ac;   /* teal accent */
+            --sidebar-bg: #0b1a1a;
+            --sidebar-border: #1a3535;
+            --bg-main: #f0f7f7;
+            --accent: var(--c2);
+            --accent-glow: rgba(17,156,159,0.22);
         }
+
         * { box-sizing: border-box; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f1f5f9; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
-        
-        /* Sidebar */
-        #sidebar { background: var(--sidebar-bg); }
-        .active-menu { background: var(--accent); color: white; box-shadow: 0 8px 24px var(--accent-glow); }
-        .menu-link:not(.active-menu):hover { background: rgba(255,255,255,0.06); color: #94a3b8; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            background-color: var(--bg-main);
+            color: #2d4a4a;
+        }
+
+        /* ===================== TYPOGRAPHY ===================== */
+        .text-11 { font-size: 11px; }
+        .text-12 { font-size: 12px; }
+        .text-13 { font-size: 13px; }
+        .text-14 { font-size: 14px; }
+        .text-15 { font-size: 15px; }
+        .text-16 { font-size: 16px; }
+        .text-18 { font-size: 18px; }
+        .text-20 { font-size: 20px; }
+
+        .font-mono { font-family: 'Courier New', Courier, monospace; }
+
+        /* ===================== SIDEBAR ===================== */
+        #sidebar {
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--sidebar-border);
+        }
+        .active-menu {
+            background: linear-gradient(135deg, var(--c2), var(--c6));
+            color: white !important;
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+        .menu-link:not(.active-menu):hover {
+            background: rgba(127,185,192,0.12);
+            color: var(--c3) !important;
+        }
+        .menu-link { transition: all 0.2s; color: #7fb9c0; }
 
         /* Mobile */
         @media (max-width: 1024px) {
@@ -35,301 +72,491 @@
         /* Scrollbar */
         .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--c3); border-radius: 10px; opacity: 0.5; }
 
-        /* Cards */
-        .stat-card { background: white; border-radius: 20px; border: 1px solid #e2e8f0; transition: transform 0.2s, box-shadow 0.2s; }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+        /* ===================== CARDS ===================== */
+        .stat-card {
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #d4eaeb;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(17,156,159,0.12); }
 
-        /* Table row */
+        /* Table */
         .inv-row { transition: background 0.15s; }
-        .inv-row:hover { background: #f8faff; }
+        .inv-row:hover { background: #edf6f7; }
 
-        /* Status badges */
-        .badge-aktif { background: #d1fae5; color: #059669; }
-        .badge-rusak { background: #fee2e2; color: #dc2626; }
+        /* ===================== BADGES ===================== */
+        .badge-aktif    { background: #d1fae5; color: #059669; }
+        .badge-rusak    { background: #fee2e2; color: #dc2626; }
         .badge-maintenance { background: #fef3c7; color: #d97706; }
 
-        /* Bapeten expire badges */
-        .exp-ok { background: #d1fae5; color: #059669; }
-        .exp-warn { background: #fef3c7; color: #d97706; }
-        .exp-danger { background: #fee2e2; color: #dc2626; }
+        .exp-ok      { background: #d1fae5; color: #059669; }
+        .exp-warn    { background: #fef3c7; color: #d97706; }
+        .exp-danger  { background: #fee2e2; color: #dc2626; }
         .exp-expired { background: #f1f5f9; color: #94a3b8; text-decoration: line-through; }
 
-        /* Toast */
+        /* ===================== TOAST ===================== */
         #toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { min-width: 260px; max-width: 340px; padding: 0.875rem 1.25rem; border-radius: 14px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 0.625rem; box-shadow: 0 8px 30px rgba(0,0,0,0.15); animation: slideUp 0.3s ease; }
-        .toast-success { background: #059669; color: white; }
-        .toast-error { background: #dc2626; color: white; }
-        .toast-info { background: #2563eb; color: white; }
+        .toast { min-width: 260px; max-width: 340px; padding: 0.875rem 1.25rem; border-radius: 14px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 0.625rem; box-shadow: 0 8px 30px rgba(0,0,0,0.15); animation: slideUp 0.3s ease; }
+        .toast-success { background: var(--c2); color: white; }
+        .toast-error   { background: #dc2626; color: white; }
+        .toast-info    { background: var(--c6); color: white; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* Modal */
-        .modal-overlay { background: rgba(15,23,42,0.85); backdrop-filter: blur(6px); }
-        .modal-box { border-radius: 24px; }
-        
-        /* Sidebar version badge */
+        /* ===================== MODAL ===================== */
+        .modal-overlay { background: rgba(11,26,26,0.88); backdrop-filter: blur(6px); }
+        .modal-box { border-radius: 22px; }
+
+        /* ===================== MISC ===================== */
         .v-badge { font-size: 9px; letter-spacing: 0.08em; }
-
-        /* Chart bars */
         .bar-fill { transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
-
-        /* Page fade */
         .page-content { animation: fadeIn 0.25s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Search highlight */
         .search-highlight { background: #fef08a; border-radius: 2px; }
-
-        /* Lucide icons fix */
         [data-lucide] { display: inline-block; vertical-align: middle; }
-
-        /* Pulse dot */
-        .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite; }
+        .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c5); animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* ===================== INPUTS ===================== */
+        input, select, textarea {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+        }
+        .input-field {
+            width: 100%; padding: 10px 14px;
+            border: 1.5px solid #c0dde0;
+            border-radius: 12px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: white;
+        }
+        .input-field:focus {
+            border-color: var(--c5);
+            box-shadow: 0 0 0 3px rgba(84,176,178,0.18);
+        }
+        .input-field:disabled { opacity: 0.5; background: #f0f7f7; }
+
+        /* ===================== BUTTONS ===================== */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--c2), var(--c6));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 11px 22px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+            display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+
+        .btn-orange {
+            background: linear-gradient(135deg, var(--c1), var(--c4));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 11px 22px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+            display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 14px rgba(245,131,32,0.25);
+        }
+        .btn-orange:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-ghost {
+            background: white;
+            border: 1.5px solid #c0dde0;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 12px;
+            padding: 9px 18px;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            display: inline-flex; align-items: center; gap: 7px;
+            color: var(--c2);
+        }
+        .btn-ghost:hover { background: #edf6f7; border-color: var(--c5); }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 11px 22px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-danger:hover { opacity: 0.88; }
+
+        /* ===================== HEADER ===================== */
+        header {
+            background: white;
+            border-bottom: 1.5px solid #d4eaeb;
+            box-shadow: 0 2px 12px rgba(17,156,159,0.07);
+        }
+
+        /* ===================== SIDEBAR ITEMS ===================== */
+        .sidebar-section-label {
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #2d6060;
+            padding: 0 12px;
+            margin-bottom: 6px;
+        }
+
+        /* ===================== STATS CARD COLORS ===================== */
+        .card-c1 { border-top: 4px solid var(--c1); }
+        .card-c2 { border-top: 4px solid var(--c2); }
+        .card-c5 { border-top: 4px solid var(--c5); }
+        .card-c4 { border-top: 4px solid var(--c4); }
+        .icon-c1 { background: #fff1e6; color: var(--c1); }
+        .icon-c2 { background: #e6f7f7; color: var(--c2); }
+        .icon-c5 { background: #ebf6f7; color: var(--c5); }
+        .icon-c4 { background: #fff6ee; color: var(--c4); }
+
+        /* Page section card */
+        .section-card {
+            background: white;
+            border: 1.5px solid #d4eaeb;
+            border-radius: 18px;
+            box-shadow: 0 2px 12px rgba(17,156,159,0.05);
+        }
+
+        /* Chip/pill filter count */
+        .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .chip-teal { background: #e6f7f7; color: var(--c2); }
+        .chip-orange { background: #fff1e6; color: var(--c1); }
+
+        /* Table header */
+        thead th { font-size: 10px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: #5a9090; }
+
+        /* ===================== SIDEBAR DEVELOPER BADGE ===================== */
+        .dev-avatar {
+            width: 34px; height: 34px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--c1), var(--c4));
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 12px; font-weight: 900;
+        }
+
+        /* ===================== DETAIL ROW ===================== */
+        .detail-row { display: flex; align-items: flex-start; gap: 8px; padding: 7px 0; }
+        .detail-label { font-size: 10px; font-weight: 900; text-transform: uppercase; color: #8ab0b0; width: 110px; flex-shrink: 0; margin-top: 2px; }
+        .detail-val { font-size: 12px; color: #2d4a4a; font-weight: 500; }
+
+        /* ===================== LOG ITEM ===================== */
+        .log-item { background: white; border: 1.5px solid #d4eaeb; border-radius: 16px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; transition: box-shadow 0.15s; }
+        .log-item:hover { box-shadow: 0 4px 16px rgba(17,156,159,0.1); }
+
+        /* ===================== BAPETEN PANEL ===================== */
+        .bapeten-header { background: linear-gradient(135deg, #fff8ee, #fff2e0); border-bottom: 1.5px solid #f5c990; }
+
+        /* ===================== SEARCH BAR ===================== */
+        .search-wrap { position: relative; }
+        .search-wrap input { padding-left: 38px; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--c5); pointer-events: none; }
+
+        /* Print hide */
+        @media print { #sidebar, header, #toast-container { display: none !important; } }
+
+        /* ===================== RESPONSIVE TABLE ===================== */
+        @media (max-width: 640px) {
+            .hide-mobile { display: none !important; }
+        }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden text-slate-700">
+<body class="flex h-screen overflow-hidden">
 
 <div id="overlay" onclick="toggleSidebar()"></div>
 <div id="toast-container"></div>
 
-<!-- SIDEBAR -->
-<aside id="sidebar" class="w-72 text-slate-400 p-5 flex flex-col shrink-0 border-r border-slate-800 lg:static overflow-y-auto custom-scroll">
-    <div class="flex items-center justify-between mb-8 px-2">
-        <div class="flex items-center gap-3 text-white">
-            <div class="bg-yellow-500 p-2 rounded-xl text-slate-900 shrink-0"><i data-lucide="radiation" class="w-5 h-5"></i></div>
+<!-- ===================== SIDEBAR ===================== -->
+<aside id="sidebar" class="w-72 p-5 flex flex-col shrink-0 lg:static overflow-y-auto custom-scroll" style="color:#7fb9c0;">
+    <!-- Logo -->
+    <div class="flex items-center justify-between mb-7 px-1">
+        <div class="flex items-center gap-3" style="color:white;">
+            <div class="p-2 rounded-xl shrink-0" style="background:var(--c1);">
+                <i data-lucide="radiation" class="w-5 h-5" style="color:#0b1a1a;"></i>
+            </div>
             <div>
-                <span class="text-base font-extrabold block leading-none tracking-tight">RSMP <span class="text-yellow-400 text-[10px] uppercase font-black">Rad Pro</span></span>
-                <span class="v-badge text-slate-500 uppercase font-bold">Inventory System v.2</span>
+                <span class="block leading-none font-black" style="font-size:15px;letter-spacing:-0.02em;">
+                    RSMP <span style="font-size:10px;color:var(--c4);font-weight:900;text-transform:uppercase;">Rad Pro</span>
+                </span>
+                <span class="v-badge" style="color:#2d6060;font-weight:700;text-transform:uppercase;">Inventory System v.2</span>
             </div>
         </div>
-        <button onclick="toggleSidebar()" class="lg:hidden text-slate-500 hover:text-white p-1"><i data-lucide="x" class="w-4 h-4"></i></button>
+        <button onclick="toggleSidebar()" class="lg:hidden p-1" style="color:#2d6060;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#2d6060'">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
     </div>
 
-    <!-- Online indicator -->
-    <div class="flex items-center gap-2 px-3 py-2 mb-4 bg-slate-800/60 rounded-xl">
+    <!-- Firebase status -->
+    <div class="flex items-center gap-2 px-3 py-2 mb-5 rounded-xl" style="background:rgba(84,176,178,0.1);border:1px solid rgba(84,176,178,0.2);">
         <div class="pulse-dot"></div>
-        <span class="text-[10px] font-bold text-slate-400 uppercase">Firebase Connected</span>
+        <span style="font-size:10px;font-weight:800;color:var(--c3);text-transform:uppercase;letter-spacing:0.1em;">Firebase Connected</span>
     </div>
 
-    <p class="text-[9px] font-black uppercase text-slate-600 px-3 mb-2 tracking-widest">Navigasi</p>
+    <p class="sidebar-section-label mb-2">Navigasi</p>
     <nav class="space-y-1">
-        <button onclick="showPage('dashboard')" id="btn-dashboard" class="menu-link active-menu w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm">
-            <i data-lucide="layout-grid" class="w-4 h-4"></i> <span class="font-semibold">Dashboard</span>
+        <button onclick="showPage('dashboard')" id="btn-dashboard" class="menu-link active-menu w-full flex items-center gap-3 px-3 py-2.5 rounded-xl" style="font-size:13px;font-weight:700;">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i> <span>Dashboard</span>
         </button>
-        <button onclick="showPage('inventory')" id="btn-inventory" class="menu-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm">
-            <i data-lucide="database" class="w-4 h-4"></i> <span class="font-semibold">Inventaris Alat</span>
+        <button onclick="showPage('inventory')" id="btn-inventory" class="menu-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl" style="font-size:13px;font-weight:700;">
+            <i data-lucide="database" class="w-4 h-4"></i> <span>Inventaris Alat</span>
         </button>
-        <button onclick="showPage('bapeten')" id="btn-bapeten" class="menu-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm">
-            <i data-lucide="shield-check" class="w-4 h-4"></i> <span class="font-semibold">Monitor Bapeten</span>
-            <span id="badge-bapeten" class="ml-auto bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full hidden">0</span>
+        <button onclick="showPage('bapeten')" id="btn-bapeten" class="menu-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl" style="font-size:13px;font-weight:700;">
+            <i data-lucide="shield-check" class="w-4 h-4"></i> <span>Monitor Bapeten</span>
+            <span id="badge-bapeten" class="ml-auto text-white text-[9px] font-black px-1.5 py-0.5 rounded-full hidden" style="background:#dc2626;font-size:9px;">0</span>
         </button>
-        <button onclick="showPage('statistik')" id="btn-statistik" class="menu-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm">
-            <i data-lucide="bar-chart-3" class="w-4 h-4"></i> <span class="font-semibold">Statistik</span>
+        <button onclick="showPage('statistik')" id="btn-statistik" class="menu-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl" style="font-size:13px;font-weight:700;">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i> <span>Statistik</span>
         </button>
-        <button onclick="showPage('logs')" id="btn-logs" class="menu-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm">
-            <i data-lucide="file-clock" class="w-4 h-4"></i> <span class="font-semibold">Audit Trail</span>
+        <button onclick="showPage('logs')" id="btn-logs" class="menu-link w-full flex items-center gap-3 px-3 py-2.5 rounded-xl" style="font-size:13px;font-weight:700;">
+            <i data-lucide="file-clock" class="w-4 h-4"></i> <span>Audit Trail</span>
         </button>
     </nav>
 
-    <div class="mt-auto pt-5 border-t border-slate-800 px-2">
-        <p class="text-[9px] uppercase font-black text-slate-600 mb-2 tracking-widest">Developed By</p>
+    <!-- Developer info -->
+    <div class="mt-auto pt-5 px-1" style="border-top:1px solid #1a3535;">
+        <p class="sidebar-section-label mb-2">Developed By</p>
         <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-xs font-black">IR</div>
+            <div class="dev-avatar">IR</div>
             <div>
-                <p class="text-xs font-bold text-white leading-none">Ino Rad</p>
-                <p class="text-[9px] text-slate-500 mt-0.5">Radiographer RSMP</p>
+                <p style="font-size:13px;font-weight:700;color:white;line-height:1;">Ino Rad</p>
+                <p style="font-size:10px;color:#2d6060;margin-top:2px;">Radiographer RSMP</p>
             </div>
         </div>
     </div>
 </aside>
 
-<!-- MAIN -->
+<!-- ===================== MAIN ===================== -->
 <main class="flex-1 flex flex-col overflow-hidden w-full">
-    
+
     <!-- HEADER -->
-    <header class="h-16 bg-white border-b px-4 lg:px-8 flex items-center justify-between shrink-0 shadow-sm">
+    <header class="h-16 px-4 lg:px-8 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
-            <button onclick="toggleSidebar()" class="lg:hidden p-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">
-                <i data-lucide="menu" class="w-5 h-5"></i>
+            <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl transition-colors" style="background:#edf6f7;">
+                <i data-lucide="menu" class="w-5 h-5" style="color:var(--c2);"></i>
             </button>
             <div>
-                <h1 id="page-title" class="text-base lg:text-lg font-extrabold text-slate-900 leading-none">Dashboard</h1>
-                <p id="page-sub" class="text-[10px] text-slate-400 font-medium mt-0.5 hidden lg:block">Ringkasan sistem inventaris radiologi</p>
+                <h1 id="page-title" style="font-size:18px;font-weight:900;color:#0b2626;line-height:1;">Dashboard</h1>
+                <p id="page-sub" class="hidden lg:block" style="font-size:11px;color:#8ab0b0;margin-top:2px;">Ringkasan sistem inventaris radiologi</p>
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <button onclick="exportCSV()" title="Export CSV" class="hidden lg:flex items-center gap-2 px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-bold transition-colors">
+            <!-- Filter count chip -->
+            <span id="filter-chip" class="chip chip-teal hidden">
+                <i data-lucide="filter" style="width:11px;height:11px;"></i>
+                <span id="filter-count-label">0 filter aktif</span>
+            </span>
+            <button onclick="exportCSV()" title="Export CSV" class="btn-ghost hidden lg:inline-flex">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
             </button>
-            <button onclick="toggleModal('modal-add')" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-3 py-2 lg:px-5 lg:py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors shadow-sm shadow-blue-200">
-                <i data-lucide="plus" class="w-4 h-4"></i> <span class="hidden lg:inline">Tambah Alat</span>
+            <button onclick="window.print()" title="Print" class="btn-ghost hidden lg:inline-flex">
+                <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print
+            </button>
+            <button onclick="toggleModal('modal-add')" class="btn-orange" style="padding:9px 16px;font-size:12px;">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span class="hidden lg:inline">Tambah Alat</span>
             </button>
         </div>
     </header>
 
-    <!-- CONTENT -->
-    <div class="flex-1 overflow-y-auto p-4 lg:p-8 custom-scroll">
+    <!-- CONTENT WRAPPER -->
+    <div class="flex-1 overflow-y-auto p-4 lg:p-7 custom-scroll">
 
-        <!-- DASHBOARD -->
+        <!-- =================== DASHBOARD =================== -->
         <div id="page-dashboard" class="page-content space-y-6">
+
+            <!-- Stat Cards -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
-                <div class="stat-card p-4 lg:p-5 border-t-4 border-blue-500">
+                <div class="stat-card card-c2 p-4 lg:p-5">
                     <div class="flex items-center justify-between mb-3">
-                        <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Total Unit</p>
-                        <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><i data-lucide="cpu" class="w-4 h-4 text-blue-500"></i></div>
+                        <p style="font-size:10px;font-weight:900;text-transform:uppercase;color:#8ab0b0;letter-spacing:0.1em;">Total Unit</p>
+                        <div class="w-9 h-9 rounded-xl icon-c2 flex items-center justify-center"><i data-lucide="cpu" class="w-4 h-4"></i></div>
                     </div>
-                    <h2 id="stat-total" class="text-3xl lg:text-4xl font-black text-slate-800">0</h2>
+                    <h2 id="stat-total" style="font-size:36px;font-weight:900;color:#0b2626;line-height:1;">0</h2>
+                    <p style="font-size:11px;color:#8ab0b0;margin-top:4px;">alat terdaftar</p>
                 </div>
-                <div class="stat-card p-4 lg:p-5 border-t-4 border-emerald-500">
+                <div class="stat-card card-c5 p-4 lg:p-5">
                     <div class="flex items-center justify-between mb-3">
-                        <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Aktif</p>
-                        <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i></div>
+                        <p style="font-size:10px;font-weight:900;text-transform:uppercase;color:#8ab0b0;letter-spacing:0.1em;">Aktif</p>
+                        <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:#ebf8f8;color:var(--c5);"><i data-lucide="check-circle" class="w-4 h-4"></i></div>
                     </div>
-                    <h2 id="stat-aktif" class="text-3xl lg:text-4xl font-black text-emerald-600">0</h2>
+                    <h2 id="stat-aktif" style="font-size:36px;font-weight:900;color:var(--c5);line-height:1;">0</h2>
+                    <p style="font-size:11px;color:#8ab0b0;margin-top:4px;">unit beroperasi</p>
                 </div>
-                <div class="stat-card p-4 lg:p-5 border-t-4 border-red-500">
+                <div class="stat-card card-c1 p-4 lg:p-5">
                     <div class="flex items-center justify-between mb-3">
-                        <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Rusak</p>
-                        <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center"><i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i></div>
+                        <p style="font-size:10px;font-weight:900;text-transform:uppercase;color:#8ab0b0;letter-spacing:0.1em;">Rusak</p>
+                        <div class="w-9 h-9 rounded-xl icon-c1 flex items-center justify-center"><i data-lucide="x-circle" class="w-4 h-4"></i></div>
                     </div>
-                    <h2 id="stat-rusak" class="text-3xl lg:text-4xl font-black text-red-600">0</h2>
+                    <h2 id="stat-rusak" style="font-size:36px;font-weight:900;color:var(--c1);line-height:1;">0</h2>
+                    <p style="font-size:11px;color:#8ab0b0;margin-top:4px;">perlu perbaikan</p>
                 </div>
-                <div class="stat-card p-4 lg:p-5 border-t-4 border-yellow-500">
+                <div class="stat-card card-c4 p-4 lg:p-5">
                     <div class="flex items-center justify-between mb-3">
-                        <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">Bapeten Exp</p>
-                        <div class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center"><i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-500"></i></div>
+                        <p style="font-size:10px;font-weight:900;text-transform:uppercase;color:#8ab0b0;letter-spacing:0.1em;">Bapeten Exp</p>
+                        <div class="w-9 h-9 rounded-xl icon-c4 flex items-center justify-center"><i data-lucide="alert-triangle" class="w-4 h-4"></i></div>
                     </div>
-                    <h2 id="stat-bapeten" class="text-3xl lg:text-4xl font-black text-yellow-600">0</h2>
+                    <h2 id="stat-bapeten" style="font-size:36px;font-weight:900;color:var(--c4);line-height:1;">0</h2>
+                    <p style="font-size:11px;color:#8ab0b0;margin-top:4px;">≤ 90 hari lagi</p>
                 </div>
             </div>
 
-            <!-- Recent + Quick Bapeten -->
+            <!-- Recent & Bapeten Alert -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-                    <h3 class="font-bold text-sm mb-4 flex items-center gap-2 text-slate-800">
-                        <i data-lucide="clock" class="w-4 h-4 text-blue-500"></i> Alat Terbaru Ditambah
+                <div class="section-card p-5">
+                    <h3 class="font-bold flex items-center gap-2 mb-4" style="font-size:14px;color:#0b2626;">
+                        <i data-lucide="clock" class="w-4 h-4" style="color:var(--c2);"></i> Alat Terbaru Ditambah
                     </h3>
                     <div id="recent-list" class="space-y-2">
-                        <p class="text-xs text-slate-400 italic">Belum ada data...</p>
+                        <p style="font-size:12px;color:#8ab0b0;font-style:italic;">Belum ada data...</p>
                     </div>
                 </div>
-                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-                    <h3 class="font-bold text-sm mb-4 flex items-center gap-2 text-slate-800">
-                        <i data-lucide="shield-alert" class="w-4 h-4 text-yellow-500"></i> Izin Bapeten Perlu Perhatian
+                <div class="section-card p-5">
+                    <h3 class="font-bold flex items-center gap-2 mb-4" style="font-size:14px;color:#0b2626;">
+                        <i data-lucide="shield-alert" class="w-4 h-4" style="color:var(--c4);"></i> Izin Bapeten Perlu Perhatian
                     </h3>
                     <div id="dash-bapeten-alert" class="space-y-2">
-                        <p class="text-xs text-slate-400 italic">Semua izin masih valid.</p>
+                        <p style="font-size:12px;color:#059669;font-style:italic;">Semua izin masih valid.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- INVENTORY -->
+        <!-- =================== INVENTORY =================== -->
         <div id="page-inventory" class="page-content hidden space-y-4">
-            <!-- Search & Filter -->
+            <!-- Search & Filters -->
             <div class="flex flex-col sm:flex-row gap-3">
-                <div class="relative flex-1">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                    <input id="search-input" type="text" placeholder="Cari nama alat, kode, lokasi..." oninput="filterInventory()" class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                <div class="relative flex-1 search-wrap">
+                    <span class="search-icon"><i data-lucide="search" class="w-4 h-4"></i></span>
+                    <input id="search-input" type="text" placeholder="Cari nama alat, kode, lokasi, merek..." oninput="filterInventory()" class="input-field">
                 </div>
-                <select id="filter-status" onchange="filterInventory()" class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                <select id="filter-status" onchange="filterInventory()" class="input-field" style="max-width:180px;">
                     <option value="">Semua Status</option>
                     <option value="aktif">Aktif</option>
                     <option value="rusak">Rusak</option>
                     <option value="maintenance">Maintenance</option>
                 </select>
-                <select id="filter-risiko" onchange="filterInventory()" class="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                <select id="filter-risiko" onchange="filterInventory()" class="input-field" style="max-width:180px;">
                     <option value="">Semua Risiko</option>
                     <option value="low">Low Risk</option>
                     <option value="medium">Medium Risk</option>
                     <option value="high">High Risk</option>
                 </select>
+                <button onclick="clearFilters()" class="btn-ghost" style="white-space:nowrap;" title="Reset filter">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset
+                </button>
             </div>
 
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <!-- Table -->
+            <div class="section-card overflow-hidden">
+                <!-- Table info bar -->
+                <div class="px-5 py-3 flex items-center justify-between" style="border-bottom:1.5px solid #d4eaeb;background:#f7fbfb;">
+                    <span id="table-count" style="font-size:12px;color:#5a9090;font-weight:600;">— alat ditemukan</span>
+                    <div class="flex gap-2">
+                        <button onclick="exportCSV()" class="btn-ghost lg:hidden" style="padding:6px 12px;font-size:11px;">
+                            <i data-lucide="download" style="width:12px;height:12px;"></i> CSV
+                        </button>
+                    </div>
+                </div>
                 <div class="overflow-x-auto custom-scroll">
-                    <table class="w-full text-left min-w-[900px]">
-                        <thead class="bg-slate-50 text-[9px] uppercase tracking-widest font-black text-slate-500">
+                    <table class="w-full text-left" style="min-width:860px;">
+                        <thead style="background:#f0f7f7;">
                             <tr>
                                 <th class="px-5 py-3.5">ID Inventaris</th>
                                 <th class="px-5 py-3.5">Alat & Merek</th>
-                                <th class="px-5 py-3.5">Lokasi</th>
+                                <th class="px-5 py-3.5 hide-mobile">Lokasi</th>
                                 <th class="px-5 py-3.5">Risiko</th>
                                 <th class="px-5 py-3.5">Status</th>
                                 <th class="px-5 py-3.5">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="inventory-table" class="text-sm divide-y divide-slate-50 bg-white"></tbody>
+                        <tbody id="inventory-table" class="divide-y" style="divide-color:#edf6f7;"></tbody>
                     </table>
                 </div>
                 <div id="empty-inventory" class="hidden py-16 text-center">
-                    <i data-lucide="inbox" class="w-10 h-10 text-slate-200 mx-auto mb-3"></i>
-                    <p class="text-sm text-slate-400 font-medium">Tidak ada data ditemukan</p>
+                    <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-3" style="color:#c0dde0;"></i>
+                    <p style="font-size:13px;color:#8ab0b0;font-weight:600;">Tidak ada data ditemukan</p>
+                    <button onclick="clearFilters()" class="btn-ghost mt-3" style="font-size:11px;padding:6px 14px;">
+                        <i data-lucide="rotate-ccw" style="width:12px;height:12px;"></i> Reset Filter
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- BAPETEN MONITORING -->
+        <!-- =================== BAPETEN MONITORING =================== -->
         <div id="page-bapeten" class="page-content hidden">
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="p-5 border-b bg-yellow-50/50 flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-yellow-100 flex items-center justify-center shrink-0">
-                        <i data-lucide="shield-check" class="w-5 h-5 text-yellow-600"></i>
+            <div class="section-card overflow-hidden">
+                <div class="bapeten-header p-5 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#fde8b4;">
+                        <i data-lucide="shield-check" class="w-5 h-5" style="color:var(--c1);"></i>
                     </div>
                     <div>
-                        <p class="font-bold text-sm text-slate-800">Monitor Izin Bapeten</p>
-                        <p class="text-[10px] text-slate-500">Status & masa berlaku izin operasional alat radiologi</p>
+                        <p style="font-size:15px;font-weight:800;color:#5a3500;">Monitor Izin Bapeten</p>
+                        <p style="font-size:11px;color:#a07030;">Status & masa berlaku izin operasional alat radiologi</p>
                     </div>
                 </div>
                 <div class="overflow-x-auto custom-scroll">
-                    <table class="w-full text-left min-w-[700px]">
-                        <thead class="bg-slate-50 text-[9px] uppercase tracking-widest font-black text-slate-500">
+                    <table class="w-full text-left" style="min-width:700px;">
+                        <thead style="background:#fffaf3;">
                             <tr>
                                 <th class="px-5 py-3.5">Nama Alat</th>
                                 <th class="px-5 py-3.5">No. Bapeten</th>
-                                <th class="px-5 py-3.5">Tgl Terbit</th>
+                                <th class="px-5 py-3.5 hide-mobile">Tgl Terbit</th>
                                 <th class="px-5 py-3.5">Tgl Berakhir</th>
                                 <th class="px-5 py-3.5">Sisa Hari</th>
                                 <th class="px-5 py-3.5">Status Izin</th>
                             </tr>
                         </thead>
-                        <tbody id="bapeten-table" class="text-sm divide-y divide-slate-50 bg-white"></tbody>
+                        <tbody id="bapeten-table" class="divide-y" style="divide-color:#f5ecd5;"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- STATISTIK -->
+        <!-- =================== STATISTIK =================== -->
         <div id="page-statistik" class="page-content hidden space-y-5">
+            <!-- Summary Row -->
+            <div class="grid grid-cols-3 gap-4" id="stat-summary-row"></div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-                    <h3 class="font-bold text-sm mb-5 text-slate-800 flex items-center gap-2">
-                        <i data-lucide="pie-chart" class="w-4 h-4 text-blue-500"></i> Distribusi Status Alat
+                <div class="section-card p-5">
+                    <h3 class="font-bold flex items-center gap-2 mb-5" style="font-size:14px;color:#0b2626;">
+                        <i data-lucide="pie-chart" class="w-4 h-4" style="color:var(--c2);"></i> Distribusi Status Alat
                     </h3>
                     <div id="chart-status" class="space-y-3"></div>
                 </div>
-                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
-                    <h3 class="font-bold text-sm mb-5 text-slate-800 flex items-center gap-2">
-                        <i data-lucide="alert-octagon" class="w-4 h-4 text-orange-500"></i> Distribusi Tingkat Risiko
+                <div class="section-card p-5">
+                    <h3 class="font-bold flex items-center gap-2 mb-5" style="font-size:14px;color:#0b2626;">
+                        <i data-lucide="alert-octagon" class="w-4 h-4" style="color:var(--c1);"></i> Distribusi Tingkat Risiko
                     </h3>
                     <div id="chart-risiko" class="space-y-3"></div>
                 </div>
-                <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm lg:col-span-2">
-                    <h3 class="font-bold text-sm mb-5 text-slate-800 flex items-center gap-2">
-                        <i data-lucide="map-pin" class="w-4 h-4 text-purple-500"></i> Alat per Lokasi
+                <div class="section-card p-5 lg:col-span-2">
+                    <h3 class="font-bold flex items-center gap-2 mb-5" style="font-size:14px;color:#0b2626;">
+                        <i data-lucide="map-pin" class="w-4 h-4" style="color:var(--c5);"></i> Alat per Lokasi
                     </h3>
                     <div id="chart-lokasi" class="space-y-3"></div>
                 </div>
             </div>
         </div>
 
-        <!-- AUDIT TRAIL -->
+        <!-- =================== AUDIT TRAIL =================== -->
         <div id="page-logs" class="page-content hidden">
             <div class="max-w-2xl mx-auto space-y-3" id="log-list">
                 <div class="text-center py-8">
-                    <i data-lucide="loader" class="w-6 h-6 text-slate-300 mx-auto animate-spin"></i>
+                    <i data-lucide="loader" class="w-6 h-6 mx-auto animate-spin" style="color:#c0dde0;"></i>
                 </div>
             </div>
         </div>
@@ -337,120 +564,115 @@
     </div>
 </main>
 
-<!-- MODAL TAMBAH -->
+<!-- ===================== MODAL TAMBAH ===================== -->
 <div id="modal-add" class="fixed inset-0 modal-overlay z-[150] hidden flex items-center justify-center p-3">
     <div class="modal-box bg-white shadow-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto custom-scroll">
-        <div class="p-5 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-3xl z-10">
+        <div class="p-5 sticky top-0 bg-white rounded-t-3xl z-10 flex justify-between items-center" style="border-bottom:1.5px solid #d4eaeb;">
             <div>
-                <h3 class="font-extrabold text-base text-slate-900">Input Alat Radiologi</h3>
-                <p class="text-[10px] text-slate-400 mt-0.5">Isi semua field yang diperlukan</p>
+                <h3 style="font-size:16px;font-weight:900;color:#0b2626;">Input Alat Radiologi</h3>
+                <p style="font-size:11px;color:#8ab0b0;margin-top:2px;">Isi semua field yang diperlukan</p>
             </div>
-            <button onclick="toggleModal('modal-add')" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors">
+            <button onclick="toggleModal('modal-add')" class="btn-ghost" style="padding:7px 10px;">
                 <i data-lucide="x" class="w-4 h-4"></i>
             </button>
         </div>
-        
         <form id="form-add-equipment" class="p-5 space-y-4">
             <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">No. Inventaris</label>
-                    <input name="kode" id="auto-kode" type="text" readonly class="w-full px-3 py-2.5 bg-slate-100 rounded-xl font-mono text-blue-600 font-bold text-sm outline-none">
+                    <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;letter-spacing:0.08em;">No. Inventaris</label>
+                    <input name="kode" id="auto-kode" type="text" readonly class="input-field font-mono" style="background:#f0f7f7;color:var(--c2);font-weight:700;">
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Nama Alat *</label>
-                    <input name="nama" type="text" required placeholder="Nama alat" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;letter-spacing:0.08em;">Nama Alat *</label>
+                    <input name="nama" type="text" required placeholder="Nama alat" class="input-field">
                 </div>
             </div>
-
             <div class="space-y-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Merek / Tipe *</label>
-                <input name="merk_type" type="text" required placeholder="Contoh: Siemens SOMATOM" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;letter-spacing:0.08em;">Merek / Tipe *</label>
+                <input name="merk_type" type="text" required placeholder="Contoh: Siemens SOMATOM" class="input-field">
             </div>
 
-            <div class="p-4 bg-yellow-50 rounded-xl border border-yellow-200 space-y-3">
-                <p class="text-[10px] font-black text-yellow-700 uppercase tracking-widest flex items-center gap-1.5">
+            <!-- Bapeten Section -->
+            <div class="p-4 rounded-xl space-y-3" style="background:#fff9ee;border:1.5px solid #f5c990;">
+                <p style="font-size:10px;font-weight:900;color:#a07030;text-transform:uppercase;letter-spacing:0.1em;" class="flex items-center gap-1.5">
                     <i data-lucide="shield" class="w-3 h-3"></i> Informasi Bapeten
                 </p>
-                <input id="input-no-bapeten" name="no_bapeten" type="text" placeholder="Nomor Izin Bapeten" class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white">
+                <input id="input-no-bapeten" name="no_bapeten" type="text" placeholder="Nomor Izin Bapeten" class="input-field" style="border-color:#f5c990;">
                 <div class="grid grid-cols-2 gap-2">
                     <div class="space-y-1">
-                        <label class="text-[9px] font-bold text-yellow-700 uppercase">Tgl Terbit</label>
-                        <input id="tgl-terbit" name="tgl_terbit" type="date" disabled class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white disabled:opacity-50">
+                        <label style="font-size:9px;font-weight:700;color:#a07030;text-transform:uppercase;">Tgl Terbit</label>
+                        <input id="tgl-terbit" name="tgl_terbit" type="date" disabled class="input-field" style="border-color:#f5c990;font-size:12px;">
                     </div>
                     <div class="space-y-1">
-                        <label class="text-[9px] font-bold text-yellow-700 uppercase">Tgl Berakhir</label>
-                        <input id="tgl-berakhir" name="tgl_berakhir" type="date" disabled class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-yellow-400 bg-white disabled:opacity-50">
+                        <label style="font-size:9px;font-weight:700;color:#a07030;text-transform:uppercase;">Tgl Berakhir</label>
+                        <input id="tgl-berakhir" name="tgl_berakhir" type="date" disabled class="input-field" style="border-color:#f5c990;font-size:12px;">
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Lokasi *</label>
-                    <input name="lokasi" type="text" required placeholder="Ruang / Gedung" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;letter-spacing:0.08em;">Lokasi *</label>
+                    <input name="lokasi" type="text" required placeholder="Ruang / Gedung" class="input-field">
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Tingkat Risiko</label>
-                    <select name="risiko" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;letter-spacing:0.08em;">Tingkat Risiko</label>
+                    <select name="risiko" class="input-field">
                         <option value="low">Low Risk</option>
                         <option value="medium">Medium Risk</option>
                         <option value="high">High Risk</option>
                     </select>
                 </div>
             </div>
-
             <div class="space-y-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Tahun Pengadaan</label>
-                <input name="tahun_pengadaan" type="number" placeholder="2024" min="1990" max="2099" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;letter-spacing:0.08em;">Tahun Pengadaan</label>
+                <input name="tahun_pengadaan" type="number" placeholder="2024" min="1990" max="2099" class="input-field">
             </div>
-
             <div class="space-y-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Catatan / Keterangan</label>
-                <textarea name="catatan" rows="2" placeholder="Catatan tambahan (opsional)..." class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;letter-spacing:0.08em;">Catatan / Keterangan</label>
+                <textarea name="catatan" rows="2" placeholder="Catatan tambahan (opsional)..." class="input-field" style="resize:none;"></textarea>
             </div>
-
             <div class="space-y-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Link Google Drive / Dokumen</label>
-                <input name="link_file" type="url" placeholder="https://drive.google.com/..." class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;letter-spacing:0.08em;">Link Google Drive / Dokumen</label>
+                <input name="link_file" type="url" placeholder="https://drive.google.com/..." class="input-field">
             </div>
-
-            <button type="submit" id="btn-simpan" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+            <button type="submit" id="btn-simpan" class="btn-primary w-full" style="justify-content:center;padding:13px;">
                 <i data-lucide="save" class="w-4 h-4"></i> SIMPAN DATA
             </button>
         </form>
     </div>
 </div>
 
-<!-- MODAL EDIT -->
+<!-- ===================== MODAL EDIT ===================== -->
 <div id="modal-edit" class="fixed inset-0 modal-overlay z-[150] hidden flex items-center justify-center p-3">
     <div class="modal-box bg-white shadow-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto custom-scroll">
-        <div class="p-5 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-3xl z-10">
+        <div class="p-5 sticky top-0 bg-white rounded-t-3xl z-10 flex justify-between items-center" style="border-bottom:1.5px solid #d4eaeb;">
             <div>
-                <h3 class="font-extrabold text-base text-slate-900">Edit Data Alat</h3>
-                <p class="text-[10px] text-slate-400 mt-0.5" id="edit-kode-label">—</p>
+                <h3 style="font-size:16px;font-weight:900;color:#0b2626;">Edit Data Alat</h3>
+                <p id="edit-kode-label" style="font-size:11px;color:#8ab0b0;margin-top:2px;">—</p>
             </div>
-            <button onclick="toggleModal('modal-edit')" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors">
+            <button onclick="toggleModal('modal-edit')" class="btn-ghost" style="padding:7px 10px;">
                 <i data-lucide="x" class="w-4 h-4"></i>
             </button>
         </div>
         <form id="form-edit-equipment" class="p-5 space-y-4">
             <input type="hidden" id="edit-id">
             <div class="space-y-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase">Nama Alat *</label>
-                <input id="edit-nama" type="text" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;">Nama Alat *</label>
+                <input id="edit-nama" type="text" required class="input-field">
             </div>
             <div class="space-y-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase">Merek / Tipe *</label>
-                <input id="edit-merk" type="text" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;">Merek / Tipe *</label>
+                <input id="edit-merk" type="text" required class="input-field">
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-400 uppercase">Lokasi *</label>
-                    <input id="edit-lokasi" type="text" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;">Lokasi *</label>
+                    <input id="edit-lokasi" type="text" required class="input-field">
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[10px] font-black text-slate-400 uppercase">Status *</label>
-                    <select id="edit-status" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;">Status *</label>
+                    <select id="edit-status" class="input-field">
                         <option value="aktif">Aktif</option>
                         <option value="rusak">Rusak</option>
                         <option value="maintenance">Maintenance</option>
@@ -458,65 +680,65 @@
                 </div>
             </div>
             <div class="space-y-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase">Tingkat Risiko</label>
-                <select id="edit-risiko" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;">Tingkat Risiko</label>
+                <select id="edit-risiko" class="input-field">
                     <option value="low">Low Risk</option>
                     <option value="medium">Medium Risk</option>
                     <option value="high">High Risk</option>
                 </select>
             </div>
-            <div class="p-4 bg-yellow-50 rounded-xl border border-yellow-200 space-y-3">
-                <p class="text-[10px] font-black text-yellow-700 uppercase tracking-widest">Informasi Bapeten</p>
-                <input id="edit-no-bapeten" type="text" placeholder="No. Bapeten" class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-sm bg-white focus:outline-none">
+            <div class="p-4 rounded-xl space-y-3" style="background:#fff9ee;border:1.5px solid #f5c990;">
+                <p style="font-size:10px;font-weight:900;color:#a07030;text-transform:uppercase;letter-spacing:0.1em;">Informasi Bapeten</p>
+                <input id="edit-no-bapeten" type="text" placeholder="No. Bapeten" class="input-field" style="border-color:#f5c990;">
                 <div class="grid grid-cols-2 gap-2">
-                    <input id="edit-tgl-terbit" type="date" class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-xs bg-white">
-                    <input id="edit-tgl-berakhir" type="date" class="w-full px-3 py-2 border border-yellow-200 rounded-lg text-xs bg-white">
+                    <input id="edit-tgl-terbit" type="date" class="input-field" style="border-color:#f5c990;font-size:12px;">
+                    <input id="edit-tgl-berakhir" type="date" class="input-field" style="border-color:#f5c990;font-size:12px;">
                 </div>
             </div>
             <div class="space-y-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase">Catatan</label>
-                <textarea id="edit-catatan" rows="2" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+                <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;">Catatan</label>
+                <textarea id="edit-catatan" rows="2" class="input-field" style="resize:none;"></textarea>
             </div>
             <div class="space-y-1">
-                <label class="text-[10px] font-black text-slate-400 uppercase">Link Dokumen</label>
-                <input id="edit-link" type="url" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label style="font-size:10px;font-weight:900;color:#8ab0b0;text-transform:uppercase;">Link Dokumen</label>
+                <input id="edit-link" type="url" class="input-field">
             </div>
-            <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+            <button type="submit" class="btn-primary w-full" style="justify-content:center;padding:13px;">
                 <i data-lucide="save" class="w-4 h-4"></i> SIMPAN PERUBAHAN
             </button>
         </form>
     </div>
 </div>
 
-<!-- MODAL DETAIL -->
+<!-- ===================== MODAL DETAIL ===================== -->
 <div id="modal-detail" class="fixed inset-0 modal-overlay z-[150] hidden flex items-center justify-center p-3">
     <div class="modal-box bg-white shadow-2xl w-full max-w-md max-h-[95vh] overflow-y-auto custom-scroll">
-        <div class="p-5 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-3xl z-10">
-            <h3 class="font-extrabold text-base text-slate-900">Detail Alat</h3>
-            <button onclick="toggleModal('modal-detail')" class="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors">
+        <div class="p-5 sticky top-0 bg-white rounded-t-3xl z-10 flex justify-between items-center" style="border-bottom:1.5px solid #d4eaeb;">
+            <h3 style="font-size:16px;font-weight:900;color:#0b2626;">Detail Alat</h3>
+            <button onclick="toggleModal('modal-detail')" class="btn-ghost" style="padding:7px 10px;">
                 <i data-lucide="x" class="w-4 h-4"></i>
             </button>
         </div>
-        <div id="detail-content" class="p-5 space-y-3 text-sm"></div>
+        <div id="detail-content" class="p-5 space-y-1"></div>
     </div>
 </div>
 
-<!-- MODAL KONFIRMASI HAPUS -->
+<!-- ===================== MODAL KONFIRMASI HAPUS ===================== -->
 <div id="modal-delete" class="fixed inset-0 modal-overlay z-[200] hidden flex items-center justify-center p-3">
     <div class="modal-box bg-white shadow-2xl w-full max-w-sm p-6 text-center">
-        <div class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <i data-lucide="trash-2" class="w-7 h-7 text-red-500"></i>
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:#fee2e2;">
+            <i data-lucide="trash-2" class="w-7 h-7" style="color:#dc2626;"></i>
         </div>
-        <h3 class="font-extrabold text-lg text-slate-900 mb-1">Hapus Alat?</h3>
-        <p class="text-sm text-slate-500 mb-6" id="delete-confirm-text">Data ini akan dihapus permanen.</p>
+        <h3 style="font-size:18px;font-weight:900;color:#0b2626;margin-bottom:6px;">Hapus Alat?</h3>
+        <p style="font-size:13px;color:#8ab0b0;margin-bottom:24px;" id="delete-confirm-text">Data ini akan dihapus permanen.</p>
         <div class="flex gap-3">
-            <button onclick="toggleModal('modal-delete')" class="flex-1 py-3 border border-slate-200 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors">Batal</button>
-            <button id="btn-confirm-delete" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm transition-colors">Hapus</button>
+            <button onclick="toggleModal('modal-delete')" class="btn-ghost flex-1" style="justify-content:center;">Batal</button>
+            <button id="btn-confirm-delete" class="btn-danger flex-1">Hapus Permanen</button>
         </div>
     </div>
 </div>
 
-<!-- FIREBASE -->
+<!-- ===================== FIREBASE ===================== -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, push, set, update, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -559,13 +781,11 @@
 
     function renderAll() {
         const items = Object.entries(eqData).map(([id, v]) => ({ id, ...v }));
-        
-        // Stats
+
         document.getElementById('stat-total').innerText = items.length;
         document.getElementById('stat-aktif').innerText = items.filter(i => i.status === 'aktif').length;
         document.getElementById('stat-rusak').innerText = items.filter(i => i.status === 'rusak').length;
 
-        // Bapeten countdown
         const today = new Date(); today.setHours(0,0,0,0);
         const bapetenItems = items.filter(i => i.no_bapeten && i.tgl_berakhir);
         const alertBapeten = bapetenItems.filter(i => {
@@ -574,8 +794,7 @@
             return diff <= 90;
         });
         document.getElementById('stat-bapeten').innerText = alertBapeten.length;
-        
-        // Badge sidebar
+
         const badge = document.getElementById('badge-bapeten');
         if (alertBapeten.length > 0) {
             badge.textContent = alertBapeten.length;
@@ -610,9 +829,9 @@
         const search = (document.getElementById('search-input')?.value || '').toLowerCase();
         const filterStatus = document.getElementById('filter-status')?.value || '';
         const filterRisiko = document.getElementById('filter-risiko')?.value || '';
-        
+
         let filtered = items;
-        if (search) filtered = filtered.filter(i => 
+        if (search) filtered = filtered.filter(i =>
             (i.nama||'').toLowerCase().includes(search) ||
             (i.kode||'').toLowerCase().includes(search) ||
             (i.lokasi||'').toLowerCase().includes(search) ||
@@ -621,20 +840,30 @@
         if (filterStatus) filtered = filtered.filter(i => i.status === filterStatus);
         if (filterRisiko) filtered = filtered.filter(i => i.risiko === filterRisiko);
 
+        // Update filter chip in header
+        const activeFilters = (search ? 1 : 0) + (filterStatus ? 1 : 0) + (filterRisiko ? 1 : 0);
+        const chip = document.getElementById('filter-chip');
+        const chipLabel = document.getElementById('filter-count-label');
+        if (activeFilters > 0 && chip) {
+            chip.classList.remove('hidden');
+            chipLabel.textContent = `${activeFilters} filter aktif`;
+        } else if (chip) {
+            chip.classList.add('hidden');
+        }
+
+        // Table count
+        const countEl = document.getElementById('table-count');
+        if (countEl) countEl.textContent = `${filtered.length} alat ditemukan`;
+
         const risikoMap = {
-            low: '<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-emerald-100 text-emerald-600">Low</span>',
-            medium: '<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-orange-100 text-orange-600">Medium</span>',
-            high: '<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-red-100 text-red-600">High</span>'
-        };
-        const statusMap = {
-            aktif: 'badge-aktif',
-            rusak: 'badge-rusak',
-            maintenance: 'badge-maintenance'
+            low: '<span class="chip" style="background:#e6f7f7;color:#119c9f;">Low</span>',
+            medium: '<span class="chip" style="background:#fff1e6;color:#f58320;">Medium</span>',
+            high: '<span class="chip" style="background:#fee2e2;color:#dc2626;">High</span>'
         };
 
         const table = document.getElementById('inventory-table');
         const empty = document.getElementById('empty-inventory');
-        
+
         if (filtered.length === 0) {
             table.innerHTML = '';
             empty.classList.remove('hidden');
@@ -642,21 +871,27 @@
             empty.classList.add('hidden');
             table.innerHTML = filtered.map(eq => `
                 <tr class="inv-row cursor-pointer" onclick="showDetail('${eq.id}')">
-                    <td class="px-5 py-3.5"><span class="font-mono font-bold text-blue-600 text-xs">${eq.kode||'—'}</span></td>
+                    <td class="px-5 py-3.5"><span class="font-mono font-bold" style="color:var(--c2);font-size:12px;">${eq.kode||'—'}</span></td>
                     <td class="px-5 py-3.5">
-                        <p class="font-bold text-slate-800 text-sm leading-none">${eq.nama||'—'}</p>
-                        <p class="text-[10px] text-slate-400 uppercase mt-0.5">${eq.merk_type||'—'}</p>
+                        <p style="font-weight:700;color:#0b2626;font-size:13px;line-height:1.2;">${eq.nama||'—'}</p>
+                        <p style="font-size:10px;color:#8ab0b0;text-transform:uppercase;margin-top:2px;">${eq.merk_type||'—'}</p>
                     </td>
-                    <td class="px-5 py-3.5 text-xs font-medium text-slate-600">${eq.lokasi||'—'}</td>
+                    <td class="px-5 py-3.5 hide-mobile" style="font-size:12px;color:#5a9090;font-weight:500;">${eq.lokasi||'—'}</td>
                     <td class="px-5 py-3.5">${risikoMap[eq.risiko] || risikoMap.low}</td>
                     <td class="px-5 py-3.5">
-                        <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${statusMap[eq.status] || 'badge-aktif'}">${eq.status||'aktif'}</span>
+                        <span class="chip ${eq.status==='aktif'?'badge-aktif':eq.status==='rusak'?'badge-rusak':'badge-maintenance'}" style="font-size:10px;font-weight:800;text-transform:uppercase;">${eq.status||'aktif'}</span>
                     </td>
                     <td class="px-5 py-3.5" onclick="event.stopPropagation()">
-                        <div class="flex items-center gap-1">
-                            ${eq.link_file ? `<a href="${eq.link_file}" target="_blank" title="Lihat Dokumen" class="w-7 h-7 flex items-center justify-center text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>` : ''}
-                            <button onclick="openEdit('${eq.id}')" title="Edit" class="w-7 h-7 flex items-center justify-center text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
-                            <button onclick="confirmDelete('${eq.id}', '${(eq.nama||'').replace(/'/g,"\\'")}');" title="Hapus" class="w-7 h-7 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        <div class="flex gap-1.5">
+                            <button onclick="showDetail('${eq.id}')" title="Detail" style="background:#e6f7f7;border:none;border-radius:8px;padding:6px;cursor:pointer;color:var(--c2);">
+                                <i data-lucide="eye" style="width:13px;height:13px;"></i>
+                            </button>
+                            <button onclick="openEdit('${eq.id}')" title="Edit" style="background:#fff1e6;border:none;border-radius:8px;padding:6px;cursor:pointer;color:var(--c1);">
+                                <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+                            </button>
+                            <button onclick="confirmDelete('${eq.id}','${(eq.nama||'').replace(/'/g,"\\'")} ')" title="Hapus" style="background:#fee2e2;border:none;border-radius:8px;padding:6px;cursor:pointer;color:#dc2626;">
+                                <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -665,59 +900,63 @@
         lucide.createIcons();
     }
 
-    function renderBapetenTable(items, today) {
-        const tbody = document.getElementById('bapeten-table');
-        if (items.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="px-5 py-8 text-center text-xs text-slate-400 italic">Tidak ada alat dengan data izin Bapeten.</td></tr>';
+    function renderBapetenTable(bapetenItems, today) {
+        const table = document.getElementById('bapeten-table');
+        if (!table) return;
+        if (bapetenItems.length === 0) {
+            table.innerHTML = `<tr><td colspan="6" class="px-5 py-10 text-center" style="font-size:12px;color:#8ab0b0;">Tidak ada alat dengan data Bapeten.</td></tr>`;
             return;
         }
-        tbody.innerHTML = items.map(i => {
-            const exp = new Date(i.tgl_berakhir);
-            const days = Math.ceil((exp - today) / 86400000);
+        const sorted = [...bapetenItems].sort((a,b) => new Date(a.tgl_berakhir) - new Date(b.tgl_berakhir));
+        table.innerHTML = sorted.map(eq => {
+            const days = Math.ceil((new Date(eq.tgl_berakhir) - today) / 86400000);
             const cls = getBapetenClass(days);
             const lbl = getBapetenLabel(days);
             return `<tr class="inv-row">
-                <td class="px-5 py-3.5 font-bold text-sm text-slate-800">${i.nama}</td>
-                <td class="px-5 py-3.5 font-mono text-xs text-slate-600">${i.no_bapeten}</td>
-                <td class="px-5 py-3.5 text-xs text-slate-500">${i.tgl_terbit||'—'}</td>
-                <td class="px-5 py-3.5 text-xs font-mono text-slate-700 font-bold">${i.tgl_berakhir}</td>
-                <td class="px-5 py-3.5 text-xs font-bold ${days < 0 ? 'text-slate-400' : days <= 30 ? 'text-red-600' : days <= 90 ? 'text-yellow-600' : 'text-emerald-600'}">${days < 0 ? 'Lewat' : days + ' hari'}</td>
-                <td class="px-5 py-3.5"><span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase ${cls}">${lbl}</span></td>
+                <td class="px-5 py-3.5" style="font-weight:700;color:#0b2626;font-size:13px;">${eq.nama}</td>
+                <td class="px-5 py-3.5 font-mono" style="font-size:12px;color:var(--c2);">${eq.no_bapeten}</td>
+                <td class="px-5 py-3.5 hide-mobile" style="font-size:12px;color:#5a9090;">${eq.tgl_terbit||'—'}</td>
+                <td class="px-5 py-3.5" style="font-size:12px;color:#5a9090;">${eq.tgl_berakhir}</td>
+                <td class="px-5 py-3.5" style="font-size:13px;font-weight:800;color:${days<0?'#94a3b8':days<=30?'#dc2626':days<=90?'#d97706':'#059669'};">${days<0?'Expired':days+' hari'}</td>
+                <td class="px-5 py-3.5"><span class="chip ${cls}" style="font-size:10px;font-weight:800;text-transform:uppercase;">${lbl}</span></td>
             </tr>`;
         }).join('');
     }
 
     function renderDashboardWidgets(items, alertBapeten, today) {
-        // Recent items
-        const sorted = [...items].sort((a,b) => (b.created_at||0) - (a.created_at||0)).slice(0,5);
         const recentEl = document.getElementById('recent-list');
-        recentEl.innerHTML = sorted.length === 0 ? '<p class="text-xs text-slate-400 italic">Belum ada data...</p>' :
-            sorted.map(i => `
-                <div class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors">
-                    <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                        <i data-lucide="cpu" class="w-4 h-4 text-blue-500"></i>
+        const sorted = [...items].sort((a,b) => (b.created_at||0) - (a.created_at||0)).slice(0,5);
+        if (sorted.length === 0) {
+            recentEl.innerHTML = '<p style="font-size:12px;color:#8ab0b0;font-style:italic;">Belum ada data...</p>';
+        } else {
+            recentEl.innerHTML = sorted.map(i => `
+                <div class="flex items-center gap-3 p-2.5 rounded-xl" style="transition:background 0.15s;" onmouseover="this.style.background='#edf6f7'" onmouseout="this.style.background='transparent'">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:#e6f7f7;color:var(--c2);">
+                        <i data-lucide="cpu" class="w-4 h-4"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs font-bold text-slate-800 truncate">${i.nama}</p>
-                        <p class="text-[10px] text-slate-400">${i.lokasi} • ${i.kode}</p>
+                        <p style="font-size:12px;font-weight:700;color:#0b2626;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${i.nama}</p>
+                        <p style="font-size:10px;color:#8ab0b0;">${i.lokasi} • ${i.kode}</p>
                     </div>
-                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${i.status==='aktif'?'badge-aktif':i.status==='rusak'?'badge-rusak':'badge-maintenance'}">${i.status||'aktif'}</span>
+                    <span class="chip ${i.status==='aktif'?'badge-aktif':i.status==='rusak'?'badge-rusak':'badge-maintenance'}" style="font-size:10px;font-weight:800;text-transform:uppercase;">${i.status||'aktif'}</span>
                 </div>
             `).join('');
+        }
 
-        // Alert bapeten on dashboard
         const alertEl = document.getElementById('dash-bapeten-alert');
         if (alertBapeten.length === 0) {
-            alertEl.innerHTML = '<p class="text-xs text-emerald-600 font-medium flex items-center gap-1.5"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Semua izin masih valid.</p>';
+            alertEl.innerHTML = '<p style="font-size:12px;color:#059669;font-weight:600;display:flex;align-items:center;gap:6px;"><i data-lucide="check-circle" style="width:14px;height:14px;"></i> Semua izin masih valid.</p>';
         } else {
             alertEl.innerHTML = alertBapeten.slice(0,5).map(i => {
                 const days = Math.ceil((new Date(i.tgl_berakhir) - today) / 86400000);
-                return `<div class="flex items-center justify-between p-2.5 rounded-xl ${days < 0 ? 'bg-slate-50' : days <= 30 ? 'bg-red-50' : 'bg-yellow-50'}">
+                const bg = days < 0 ? '#f8fafc' : days <= 30 ? '#fef2f2' : '#fffbeb';
+                const dayColor = days < 0 ? '#94a3b8' : days <= 30 ? '#dc2626' : '#d97706';
+                return `<div class="flex items-center justify-between p-2.5 rounded-xl" style="background:${bg};">
                     <div>
-                        <p class="text-xs font-bold text-slate-800">${i.nama}</p>
-                        <p class="text-[10px] text-slate-500">${i.tgl_berakhir}</p>
+                        <p style="font-size:12px;font-weight:700;color:#0b2626;">${i.nama}</p>
+                        <p style="font-size:10px;color:#8ab0b0;">${i.tgl_berakhir}</p>
                     </div>
-                    <span class="text-[9px] font-black uppercase px-2 py-1 rounded-full ${days < 0 ? 'bg-slate-200 text-slate-500' : days <= 30 ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-700'}">${days < 0 ? 'Expired' : days + 'h lagi'}</span>
+                    <span class="chip" style="font-size:10px;font-weight:800;background:${bg};color:${dayColor};border:1.5px solid ${dayColor}30;">${days<0?'Expired':days+'h lagi'}</span>
                 </div>`;
             }).join('');
         }
@@ -725,56 +964,78 @@
     }
 
     function renderStatistik(items) {
-        function drawBar(containerId, dataMap, colorMap) {
+        // Color palette matching brand
+        const barColors = {
+            aktif: 'linear-gradient(90deg,#54b0b2,#119c9f)',
+            rusak: 'linear-gradient(90deg,#f5a45a,#f58320)',
+            maintenance: 'linear-gradient(90deg,#fbbf24,#d97706)',
+            low: 'linear-gradient(90deg,#7fb9c0,#54b0b2)',
+            medium: 'linear-gradient(90deg,#f5a45a,#f58320)',
+            high: 'linear-gradient(90deg,#f87171,#dc2626)',
+        };
+
+        function drawBar(containerId, dataMap, colors) {
             const el = document.getElementById(containerId);
             if (!el) return;
             const total = Object.values(dataMap).reduce((a,b) => a+b, 0);
-            if (total === 0) { el.innerHTML = '<p class="text-xs text-slate-400 italic">Belum ada data</p>'; return; }
-            el.innerHTML = Object.entries(dataMap).map(([k,v]) => `
-                <div>
+            if (total === 0) { el.innerHTML = '<p style="font-size:12px;color:#8ab0b0;font-style:italic;">Belum ada data</p>'; return; }
+            el.innerHTML = Object.entries(dataMap).map(([k,v]) => {
+                const pct = Math.round(v/total*100);
+                const grad = colors[k] || 'linear-gradient(90deg,#7fb9c0,#119c9f)';
+                return `<div>
                     <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs font-bold text-slate-700 capitalize">${k}</span>
-                        <span class="text-xs text-slate-500 font-mono">${v} unit (${Math.round(v/total*100)}%)</span>
+                        <span style="font-size:13px;font-weight:700;color:#2d4a4a;text-transform:capitalize;">${k}</span>
+                        <span class="font-mono" style="font-size:12px;color:#8ab0b0;">${v} unit (${pct}%)</span>
                     </div>
-                    <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div class="bar-fill h-full rounded-full ${colorMap[k] || 'bg-blue-500'}" style="width: ${Math.round(v/total*100)}%"></div>
+                    <div style="height:10px;background:#e6f2f3;border-radius:999px;overflow:hidden;">
+                        <div class="bar-fill" style="height:100%;border-radius:999px;width:0%;background:${grad};transition:width 0.8s cubic-bezier(0.4,0,0.2,1);" data-width="${pct}"></div>
                     </div>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
+            // Animate bars
+            setTimeout(() => {
+                el.querySelectorAll('.bar-fill[data-width]').forEach(bar => {
+                    bar.style.width = bar.dataset.width + '%';
+                });
+            }, 100);
         }
 
         const statusCount = { aktif: 0, rusak: 0, maintenance: 0 };
         const risikoCount = { low: 0, medium: 0, high: 0 };
         const lokasiCount = {};
         items.forEach(i => {
-            statusCount[i.status] = (statusCount[i.status]||0) + 1;
-            risikoCount[i.risiko] = (risikoCount[i.risiko]||0) + 1;
+            if (i.status) statusCount[i.status] = (statusCount[i.status]||0) + 1;
+            if (i.risiko) risikoCount[i.risiko] = (risikoCount[i.risiko]||0) + 1;
             const lok = i.lokasi || 'Tidak diketahui';
             lokasiCount[lok] = (lokasiCount[lok]||0) + 1;
         });
 
-        drawBar('chart-status', statusCount, { aktif: 'bg-emerald-500', rusak: 'bg-red-500', maintenance: 'bg-yellow-500' });
-        drawBar('chart-risiko', risikoCount, { low: 'bg-emerald-500', medium: 'bg-orange-400', high: 'bg-red-500' });
+        drawBar('chart-status', statusCount, barColors);
+        drawBar('chart-risiko', risikoCount, barColors);
         drawBar('chart-lokasi', lokasiCount, {});
     }
 
     function renderLogs(data) {
         const container = document.getElementById('log-list');
-        if (!data) { container.innerHTML = '<p class="text-center text-xs text-slate-400 italic py-8">Belum ada log aktivitas.</p>'; return; }
+        if (!data) {
+            container.innerHTML = '<p style="text-align:center;font-size:12px;color:#8ab0b0;font-style:italic;padding:32px 0;">Belum ada log aktivitas.</p>';
+            return;
+        }
         const logItems = Object.values(data).reverse().slice(0, 20);
         container.innerHTML = logItems.map(log => {
             const ico = log.aksi?.startsWith('Tambah') ? 'plus-circle' : log.aksi?.startsWith('Edit') ? 'pencil' : log.aksi?.startsWith('Hapus') ? 'trash-2' : 'activity';
-            const col = log.aksi?.startsWith('Tambah') ? 'text-emerald-500' : log.aksi?.startsWith('Hapus') ? 'text-red-500' : 'text-blue-500';
-            return `<div class="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm flex gap-3 items-start">
-                <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
-                    <i data-lucide="${ico}" class="w-3.5 h-3.5 ${col}"></i>
+            const colStyle = log.aksi?.startsWith('Tambah') ? 'color:var(--c2)' : log.aksi?.startsWith('Hapus') ? 'color:#dc2626' : 'color:var(--c5)';
+            const bgStyle = log.aksi?.startsWith('Tambah') ? 'background:#e6f7f7' : log.aksi?.startsWith('Hapus') ? 'background:#fee2e2' : 'background:#ebf6f7';
+            return `<div class="log-item">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style="${bgStyle};">
+                    <i data-lucide="${ico}" style="width:14px;height:14px;${colStyle};"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start gap-2">
-                        <span class="text-[10px] font-black text-blue-600">${log.user}</span>
-                        <span class="text-[9px] text-slate-400 shrink-0 font-mono">${new Date(log.waktu).toLocaleString('id-ID')}</span>
+                        <span style="font-size:11px;font-weight:800;color:var(--c2);">${log.user}</span>
+                        <span class="font-mono" style="font-size:10px;color:#8ab0b0;white-space:nowrap;">${new Date(log.waktu).toLocaleString('id-ID')}</span>
                     </div>
-                    <p class="text-xs text-slate-600 mt-0.5">${log.aksi}</p>
+                    <p style="font-size:12px;color:#2d4a4a;margin-top:3px;">${log.aksi}</p>
                 </div>
             </div>`;
         }).join('');
@@ -785,7 +1046,8 @@
     document.getElementById('form-add-equipment').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btn-simpan');
-        btn.disabled = true; btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Menyimpan...';
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Menyimpan...';
         lucide.createIcons();
         const f = new FormData(e.target);
         const data = {
@@ -806,7 +1068,8 @@
         } catch(err) {
             showToast('Gagal menyimpan: ' + err.message, 'error');
         }
-        btn.disabled = false; btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> SIMPAN DATA';
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> SIMPAN DATA';
         lucide.createIcons();
     });
 
@@ -875,38 +1138,38 @@
     window.showDetail = function(id) {
         const eq = window._eqData[id];
         if (!eq) return;
-        const risikoColor = { low: 'text-emerald-600', medium: 'text-orange-500', high: 'text-red-600' };
+        const risikoStyle = { low: 'color:#119c9f;font-weight:800;', medium: 'color:#f58320;font-weight:800;', high: 'color:#dc2626;font-weight:800;' };
         document.getElementById('detail-content').innerHTML = `
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center">
-                    <i data-lucide="cpu" class="w-6 h-6 text-blue-500"></i>
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#e6f7f7;">
+                    <i data-lucide="cpu" class="w-6 h-6" style="color:var(--c2);"></i>
                 </div>
                 <div>
-                    <p class="font-extrabold text-base text-slate-900">${eq.nama}</p>
-                    <p class="text-[10px] text-slate-400 uppercase">${eq.merk_type}</p>
+                    <p style="font-weight:900;font-size:15px;color:#0b2626;">${eq.nama}</p>
+                    <p style="font-size:10px;color:#8ab0b0;text-transform:uppercase;margin-top:2px;">${eq.merk_type}</p>
                 </div>
             </div>
-            <hr class="border-slate-100 my-3">
-            ${row('No. Inventaris', `<span class="font-mono font-bold text-blue-600">${eq.kode}</span>`)}
+            <hr style="border-color:#d4eaeb;margin:12px 0;">
+            ${row('No. Inventaris', `<span class="font-mono" style="font-weight:700;color:var(--c2);">${eq.kode}</span>`)}
             ${row('Lokasi', eq.lokasi)}
-            ${row('Status', `<span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${eq.status==='aktif'?'badge-aktif':eq.status==='rusak'?'badge-rusak':'badge-maintenance'}">${eq.status||'aktif'}</span>`)}
-            ${row('Risiko', `<span class="font-bold ${risikoColor[eq.risiko]||''} capitalize">${eq.risiko||'low'}</span>`)}
+            ${row('Status', `<span class="chip ${eq.status==='aktif'?'badge-aktif':eq.status==='rusak'?'badge-rusak':'badge-maintenance'}" style="font-size:10px;font-weight:800;text-transform:uppercase;">${eq.status||'aktif'}</span>`)}
+            ${row('Risiko', `<span style="${risikoStyle[eq.risiko]||''}text-transform:capitalize;">${eq.risiko||'low'}</span>`)}
             ${eq.tahun_pengadaan ? row('Tahun Pengadaan', eq.tahun_pengadaan) : ''}
-            ${eq.no_bapeten ? `<hr class="border-slate-100 my-2"><p class="text-[10px] font-black text-yellow-600 uppercase mb-2">Informasi Bapeten</p>
+            ${eq.no_bapeten ? `<hr style="border-color:#d4eaeb;margin:12px 0;"><p style="font-size:10px;font-weight:900;color:var(--c1);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Informasi Bapeten</p>
                 ${row('No. Bapeten', eq.no_bapeten)}
                 ${eq.tgl_terbit ? row('Tgl Terbit', eq.tgl_terbit) : ''}
                 ${eq.tgl_berakhir ? row('Tgl Berakhir', eq.tgl_berakhir) : ''}` : ''}
-            ${eq.catatan ? `<hr class="border-slate-100 my-2">${row('Catatan', eq.catatan)}` : ''}
-            ${eq.link_file ? `<hr class="border-slate-100 my-2"><a href="${eq.link_file}" target="_blank" class="flex items-center gap-2 text-blue-600 font-bold text-xs hover:underline"><i data-lucide="external-link" class="w-3.5 h-3.5"></i> Lihat Dokumen</a>` : ''}
+            ${eq.catatan ? `<hr style="border-color:#d4eaeb;margin:12px 0;">${row('Catatan', eq.catatan)}` : ''}
+            ${eq.link_file ? `<hr style="border-color:#d4eaeb;margin:12px 0;"><a href="${eq.link_file}" target="_blank" style="display:flex;align-items:center;gap:6px;color:var(--c2);font-weight:700;font-size:13px;text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'"><i data-lucide="external-link" style="width:14px;height:14px;"></i> Lihat Dokumen</a>` : ''}
         `;
         toggleModal('modal-detail');
         lucide.createIcons();
     };
 
     function row(label, value) {
-        return `<div class="flex items-start gap-2 py-1.5">
-            <p class="text-[10px] font-black text-slate-400 uppercase w-28 shrink-0 mt-0.5">${label}</p>
-            <p class="text-xs text-slate-700 font-medium">${value || '—'}</p>
+        return `<div class="detail-row">
+            <p class="detail-label">${label}</p>
+            <p class="detail-val">${value || '—'}</p>
         </div>`;
     }
 
@@ -922,14 +1185,28 @@
         const csv = [headers.join(','), ...rows].join('\n');
         const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `RSMP_Radiologi_${new Date().toISOString().slice(0,10)}.csv`;
-        a.click(); URL.revokeObjectURL(url);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `RSMP_Radiologi_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
         showToast('Export CSV berhasil!', 'success');
     };
 
     // FILTER
     window.filterInventory = function() {
         renderInventoryTable(Object.entries(window._eqData||{}).map(([id,v])=>({id,...v})));
+    };
+
+    // CLEAR FILTERS
+    window.clearFilters = function() {
+        const s = document.getElementById('search-input');
+        const fs = document.getElementById('filter-status');
+        const fr = document.getElementById('filter-risiko');
+        if (s) s.value = '';
+        if (fs) fs.value = '';
+        if (fr) fr.value = '';
+        filterInventory();
     };
 
     // BAPETEN DATE UNLOCK
@@ -956,10 +1233,7 @@
 
     function showPage(pageId) {
         document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
-        document.querySelectorAll('.menu-link').forEach(l => {
-            l.classList.remove('active-menu');
-            l.style.color = '';
-        });
+        document.querySelectorAll('.menu-link').forEach(l => { l.classList.remove('active-menu'); });
         const pg = document.getElementById('page-' + pageId);
         if (pg) pg.classList.remove('hidden');
         const btn = document.getElementById('btn-' + pageId);
@@ -973,8 +1247,7 @@
     }
 
     function toggleModal(id) {
-        const el = document.getElementById(id);
-        el.classList.toggle('hidden');
+        document.getElementById(id).classList.toggle('hidden');
     }
 
     function showToast(msg, type = 'info') {
@@ -987,7 +1260,7 @@
         setTimeout(() => {
             div.style.opacity = '0'; div.style.transition = 'opacity 0.3s';
             setTimeout(() => div.remove(), 300);
-        }, 3000);
+        }, 3500);
     }
 
     lucide.createIcons();
