@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RS Mitra Plumbon | Radiologi Inventory PRO v.2</title>
+    <title>RS Mitra Plumbon | Radiologi Inventory PRO v.4</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☢️</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -267,6 +268,47 @@
         .search-wrap input { padding-left: 38px; }
         .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--c5); pointer-events: none; }
 
+
+        /* ===================== LIVE INDICATOR ===================== */
+        .live-dot { width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;animation:livepulse 2s infinite; }
+        @keyframes livepulse { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.5);} 60%{box-shadow:0 0 0 5px rgba(34,197,94,0);} }
+
+        /* ===================== STAT CARD UPGRADE ===================== */
+        .stat-progress { height:4px;border-radius:99px;background:#e6f2f3;overflow:hidden;margin-top:8px; }
+        .stat-progress-fill { height:100%;border-radius:99px;transition:width 1s cubic-bezier(0.4,0,0.2,1); }
+
+        /* ===================== UNIFIED RECENT LIST ===================== */
+        .unified-item {
+            display:flex;align-items:center;gap:10px;
+            padding:8px 10px;border-radius:12px;
+            transition:background 0.15s;cursor:pointer;
+        }
+        .unified-item:hover { background:#edf6f7; }
+        .unified-badge {
+            font-size:9px;font-weight:800;text-transform:uppercase;
+            padding:2px 7px;border-radius:20px;flex-shrink:0;white-space:nowrap;
+        }
+        .unified-days {
+            font-size:10px;font-weight:700;padding:1px 6px;border-radius:6px;flex-shrink:0;
+        }
+
+        /* ===================== DONUT / CHART CONTAINERS ===================== */
+        .chart-canvas-wrap { position:relative;height:200px;width:100%; }
+        .chart-canvas-wrap canvas { max-height:200px; }
+
+        /* ===================== MAINTENANCE CARD ===================== */
+        .card-c6 { border-top:4px solid var(--c6); }
+        .icon-c6 { background:#e6f5f6;color:var(--c6); }
+
+        /* ===================== SYNC INFO BAR ===================== */
+        .sync-bar {
+            display:flex;align-items:center;gap:8px;
+            font-size:11px;color:#5a9090;
+            padding:6px 12px;border-radius:10px;
+            background:rgba(17,156,159,0.06);border:1px solid rgba(17,156,159,0.12);
+            margin-bottom:0;
+        }
+
         /* Print hide */
         @media print { #sidebar, header, #toast-container { display: none !important; } }
 
@@ -426,59 +468,95 @@
         <!-- =================== DASHBOARD =================== -->
         <div id="page-dashboard" class="page-content space-y-6">
 
-            <!-- Stat Cards -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
+            <!-- Stat Cards — v4 with progress bars -->
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
                 <div class="stat-card card-c2 p-4 lg:p-5">
                     <div class="flex items-center justify-between mb-3">
                         <p style="font-size:10px;font-weight:900;text-transform:uppercase;color:#8ab0b0;letter-spacing:0.1em;">Total Unit</p>
                         <div class="w-9 h-9 rounded-xl icon-c2 flex items-center justify-center"><i data-lucide="cpu" class="w-4 h-4"></i></div>
                     </div>
-                    <h2 id="stat-total" style="font-size:36px;font-weight:900;color:#0b2626;line-height:1;">0</h2>
-                    <p style="font-size:11px;color:#8ab0b0;margin-top:4px;">alat terdaftar</p>
+                    <h2 id="stat-total" style="font-size:34px;font-weight:900;color:#0b2626;line-height:1;">0</h2>
+                    <p style="font-size:11px;color:#8ab0b0;margin-top:3px;">alat terdaftar</p>
+                    <div class="stat-progress"><div id="prog-total" class="stat-progress-fill" style="width:100%;background:var(--c2);"></div></div>
                 </div>
                 <div class="stat-card card-c5 p-4 lg:p-5">
                     <div class="flex items-center justify-between mb-3">
                         <p style="font-size:10px;font-weight:900;text-transform:uppercase;color:#8ab0b0;letter-spacing:0.1em;">Aktif</p>
                         <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:#ebf8f8;color:var(--c5);"><i data-lucide="check-circle" class="w-4 h-4"></i></div>
                     </div>
-                    <h2 id="stat-aktif" style="font-size:36px;font-weight:900;color:var(--c5);line-height:1;">0</h2>
-                    <p style="font-size:11px;color:#8ab0b0;margin-top:4px;">unit beroperasi</p>
+                    <h2 id="stat-aktif" style="font-size:34px;font-weight:900;color:var(--c5);line-height:1;">0</h2>
+                    <p style="font-size:11px;color:#8ab0b0;margin-top:3px;">beroperasi</p>
+                    <div class="stat-progress"><div id="prog-aktif" class="stat-progress-fill" style="width:0%;background:var(--c5);"></div></div>
                 </div>
                 <div class="stat-card card-c1 p-4 lg:p-5">
                     <div class="flex items-center justify-between mb-3">
                         <p style="font-size:10px;font-weight:900;text-transform:uppercase;color:#8ab0b0;letter-spacing:0.1em;">Rusak</p>
                         <div class="w-9 h-9 rounded-xl icon-c1 flex items-center justify-center"><i data-lucide="x-circle" class="w-4 h-4"></i></div>
                     </div>
-                    <h2 id="stat-rusak" style="font-size:36px;font-weight:900;color:var(--c1);line-height:1;">0</h2>
-                    <p style="font-size:11px;color:#8ab0b0;margin-top:4px;">perlu perbaikan</p>
+                    <h2 id="stat-rusak" style="font-size:34px;font-weight:900;color:var(--c1);line-height:1;">0</h2>
+                    <p style="font-size:11px;color:#8ab0b0;margin-top:3px;">perlu perbaikan</p>
+                    <div class="stat-progress"><div id="prog-rusak" class="stat-progress-fill" style="width:0%;background:var(--c1);"></div></div>
+                </div>
+                <div class="stat-card card-c6 p-4 lg:p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <p style="font-size:10px;font-weight:900;text-transform:uppercase;color:#8ab0b0;letter-spacing:0.1em;">Maintenance</p>
+                        <div class="w-9 h-9 rounded-xl icon-c6 flex items-center justify-center"><i data-lucide="wrench" class="w-4 h-4"></i></div>
+                    </div>
+                    <h2 id="stat-maintenance" style="font-size:34px;font-weight:900;color:var(--c6);line-height:1;">0</h2>
+                    <p style="font-size:11px;color:#8ab0b0;margin-top:3px;">sedang diperbaiki</p>
+                    <div class="stat-progress"><div id="prog-maintenance" class="stat-progress-fill" style="width:0%;background:var(--c6);"></div></div>
                 </div>
                 <div class="stat-card card-c4 p-4 lg:p-5">
                     <div class="flex items-center justify-between mb-3">
                         <p style="font-size:10px;font-weight:900;text-transform:uppercase;color:#8ab0b0;letter-spacing:0.1em;">Bapeten Exp</p>
                         <div class="w-9 h-9 rounded-xl icon-c4 flex items-center justify-center"><i data-lucide="alert-triangle" class="w-4 h-4"></i></div>
                     </div>
-                    <h2 id="stat-bapeten" style="font-size:36px;font-weight:900;color:var(--c4);line-height:1;">0</h2>
-                    <p style="font-size:11px;color:#8ab0b0;margin-top:4px;">≤ 90 hari lagi</p>
+                    <h2 id="stat-bapeten" style="font-size:34px;font-weight:900;color:var(--c4);line-height:1;">0</h2>
+                    <p style="font-size:11px;color:#8ab0b0;margin-top:3px;">≤ 90 hari lagi</p>
+                    <div class="stat-progress"><div id="prog-bapeten" class="stat-progress-fill" style="width:0%;background:var(--c4);"></div></div>
                 </div>
             </div>
 
-            <!-- Recent & Bapeten Alert -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                <div class="section-card p-5">
-                    <h3 class="font-bold flex items-center gap-2 mb-4" style="font-size:14px;color:#0b2626;">
-                        <i data-lucide="clock" class="w-4 h-4" style="color:var(--c2);"></i> Alat Terbaru Ditambah
-                    </h3>
-                    <div id="recent-list" class="space-y-2">
-                        <p style="font-size:12px;color:#8ab0b0;font-style:italic;">Belum ada data...</p>
+            <!-- Sync Bar -->
+            <div class="sync-bar">
+                <span class="live-dot"></span>
+                <span style="font-weight:800;font-size:11px;color:var(--c2);">FIREBASE LIVE</span>
+                <span style="opacity:0.5;">•</span>
+                <span>Terakhir diperbarui: <span id="sync-time" style="font-weight:700;color:var(--c2);">—</span></span>
+                <span style="opacity:0.5;margin-left:auto;">Instalasi Radiologi RS Mitra Plumbon</span>
+            </div>
+
+            <!-- Dashboard Main Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+                <!-- Unified Recent + Alert List -->
+                <div class="section-card p-5 lg:col-span-2">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold flex items-center gap-2" style="font-size:14px;color:#0b2626;">
+                            <i data-lucide="activity" class="w-4 h-4" style="color:var(--c2);"></i> Status & Aktivitas Terkini
+                        </h3>
+                        <div class="flex gap-1.5">
+                            <button onclick="setUnifiedFilter('semua')" id="uf-semua" class="btn-ghost active-uf" style="padding:4px 10px;font-size:10px;">Semua</button>
+                            <button onclick="setUnifiedFilter('alert')" id="uf-alert" class="btn-ghost" style="padding:4px 10px;font-size:10px;">⚠ Bapeten</button>
+                        </div>
                     </div>
+                    <div id="unified-list" class="space-y-1">
+                        <p style="font-size:12px;color:#8ab0b0;font-style:italic;">Memuat data...</p>
+                    </div>
+                    <!-- hidden containers for legacy compat -->
+                    <div id="recent-list" class="hidden"></div>
+                    <div id="dash-bapeten-alert" class="hidden"></div>
                 </div>
+
+                <!-- Donut Chart Status -->
                 <div class="section-card p-5">
                     <h3 class="font-bold flex items-center gap-2 mb-4" style="font-size:14px;color:#0b2626;">
-                        <i data-lucide="shield-alert" class="w-4 h-4" style="color:var(--c4);"></i> Izin Bapeten Perlu Perhatian
+                        <i data-lucide="pie-chart" class="w-4 h-4" style="color:var(--c2);"></i> Status Alat
                     </h3>
-                    <div id="dash-bapeten-alert" class="space-y-2">
-                        <p style="font-size:12px;color:#059669;font-style:italic;">Semua izin masih valid.</p>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="dash-donut-chart"></canvas>
                     </div>
+                    <div id="dash-donut-legend" class="mt-3 space-y-1.5"></div>
                 </div>
             </div>
         </div>
@@ -579,23 +657,37 @@
             <!-- Summary Row -->
             <div class="grid grid-cols-3 gap-4" id="stat-summary-row"></div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <!-- Status Donut -->
                 <div class="section-card p-5">
-                    <h3 class="font-bold flex items-center gap-2 mb-5" style="font-size:14px;color:#0b2626;">
+                    <h3 class="font-bold flex items-center gap-2 mb-4" style="font-size:14px;color:#0b2626;">
                         <i data-lucide="pie-chart" class="w-4 h-4" style="color:var(--c2);"></i> Distribusi Status Alat
                     </h3>
-                    <div id="chart-status" class="space-y-3"></div>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="chart-status-donut"></canvas>
+                    </div>
+                    <div id="chart-status-legend" class="mt-3 space-y-1.5"></div>
+                    <div id="chart-status" class="hidden space-y-3"></div>
                 </div>
+                <!-- Risiko Donut -->
                 <div class="section-card p-5">
-                    <h3 class="font-bold flex items-center gap-2 mb-5" style="font-size:14px;color:#0b2626;">
+                    <h3 class="font-bold flex items-center gap-2 mb-4" style="font-size:14px;color:#0b2626;">
                         <i data-lucide="alert-octagon" class="w-4 h-4" style="color:var(--c1);"></i> Distribusi Tingkat Risiko
                     </h3>
-                    <div id="chart-risiko" class="space-y-3"></div>
+                    <div class="chart-canvas-wrap">
+                        <canvas id="chart-risiko-donut"></canvas>
+                    </div>
+                    <div id="chart-risiko-legend" class="mt-3 space-y-1.5"></div>
+                    <div id="chart-risiko" class="hidden space-y-3"></div>
                 </div>
+                <!-- Lokasi Bar Chart -->
                 <div class="section-card p-5 lg:col-span-2">
-                    <h3 class="font-bold flex items-center gap-2 mb-5" style="font-size:14px;color:#0b2626;">
+                    <h3 class="font-bold flex items-center gap-2 mb-4" style="font-size:14px;color:#0b2626;">
                         <i data-lucide="map-pin" class="w-4 h-4" style="color:var(--c5);"></i> Alat per Lokasi
                     </h3>
-                    <div id="chart-lokasi" class="space-y-3"></div>
+                    <div style="position:relative;height:220px;">
+                        <canvas id="chart-lokasi-bar"></canvas>
+                    </div>
+                    <div id="chart-lokasi" class="hidden space-y-3"></div>
                 </div>
             </div>
         </div>
@@ -1033,97 +1125,265 @@
         }).join('');
     }
 
-    function renderDashboardWidgets(items, alertBapeten, today) {
-        const recentEl = document.getElementById('recent-list');
-        const sorted = [...items].sort((a,b) => (b.created_at||0) - (a.created_at||0)).slice(0,5);
-        if (sorted.length === 0) {
-            recentEl.innerHTML = '<p style="font-size:12px;color:#8ab0b0;font-style:italic;">Belum ada data...</p>';
-        } else {
-            recentEl.innerHTML = sorted.map(i => `
-                <div class="flex items-center gap-3 p-2.5 rounded-xl" style="transition:background 0.15s;" onmouseover="this.style.background='#edf6f7'" onmouseout="this.style.background='transparent'">
-                    ${i.foto_b64
-                        ? `<img src="${i.foto_b64}" style="width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1.5px solid #d4eaeb;" alt="foto">`
-                        : `<div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background:#e6f7f7;color:var(--c2);"><i data-lucide="cpu" class="w-4 h-4"></i></div>`
-                    }
-                    <div class="flex-1 min-w-0">
+    // ===== UNIFIED DASHBOARD LIST =====
+    window._dashItems = [];
+    window._dashAlerts = [];
+    window._dashToday = null;
+    window._unifiedFilter = 'semua';
+
+    window.setUnifiedFilter = function(f) {
+        window._unifiedFilter = f;
+        document.getElementById('uf-semua').style.background = f==='semua' ? 'var(--c2)' : '';
+        document.getElementById('uf-semua').style.color = f==='semua' ? 'white' : '';
+        document.getElementById('uf-alert').style.background = f==='alert' ? 'var(--c1)' : '';
+        document.getElementById('uf-alert').style.color = f==='alert' ? 'white' : '';
+        renderUnifiedList();
+    };
+
+    function renderUnifiedList() {
+        const el = document.getElementById('unified-list');
+        if (!el) return;
+        const items = window._dashItems;
+        const alerts = window._dashAlerts;
+        const today = window._dashToday;
+        const filter = window._unifiedFilter;
+
+        // Build combined list
+        let rows = [];
+
+        if (filter !== 'alert') {
+            // Recent items (last 4)
+            const recent = [...items].sort((a,b)=>(b.created_at||0)-(a.created_at||0)).slice(0,4);
+            recent.forEach(i => {
+                const statusColor = i.status==='aktif'?'badge-aktif':i.status==='rusak'?'badge-rusak':'badge-maintenance';
+                const thumb = i.foto_b64
+                    ? `<img src="${i.foto_b64}" style="width:34px;height:34px;border-radius:9px;object-fit:cover;flex-shrink:0;border:1.5px solid #d4eaeb;">`
+                    : `<div style="width:34px;height:34px;border-radius:9px;background:#e6f7f7;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--c2);"><i data-lucide="cpu" style="width:14px;height:14px;"></i></div>`;
+                rows.push(`<div class="unified-item" onclick="showDetail('${i.id}')">
+                    ${thumb}
+                    <div style="flex:1;min-width:0;">
                         <p style="font-size:12px;font-weight:700;color:#0b2626;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${i.nama}</p>
-                        <p style="font-size:10px;color:#8ab0b0;">${i.lokasi} • ${i.kode}</p>
+                        <p style="font-size:10px;color:#8ab0b0;">${i.lokasi||'—'} · ${i.kode||'—'}</p>
                     </div>
-                    <span class="chip ${i.status==='aktif'?'badge-aktif':i.status==='rusak'?'badge-rusak':'badge-maintenance'}" style="font-size:10px;font-weight:800;text-transform:uppercase;">${i.status||'aktif'}</span>
-                </div>
-            `).join('');
+                    <span class="unified-badge ${statusColor}">${i.status||'aktif'}</span>
+                </div>`);
+            });
         }
 
-        const alertEl = document.getElementById('dash-bapeten-alert');
-        if (alertBapeten.length === 0) {
-            alertEl.innerHTML = '<p style="font-size:12px;color:#059669;font-weight:600;display:flex;align-items:center;gap:6px;"><i data-lucide="check-circle" style="width:14px;height:14px;"></i> Semua izin masih valid.</p>';
+        // Bapeten alerts
+        if (filter !== 'semua' || alerts.length > 0) {
+            if (alerts.length === 0 && filter === 'alert') {
+                rows.push(`<div style="padding:12px;text-align:center;font-size:12px;color:#059669;font-weight:600;">✓ Semua izin Bapeten masih valid</div>`);
+            } else {
+                const showAlerts = filter === 'alert' ? alerts : alerts.slice(0,3);
+                if (filter === 'semua' && alerts.length > 0) {
+                    rows.push(`<div style="padding:4px 10px 2px;"><p style="font-size:10px;font-weight:900;color:#d97706;text-transform:uppercase;letter-spacing:0.08em;">⚠ Perlu Perhatian — Bapeten</p></div>`);
+                }
+                showAlerts.forEach(i => {
+                    if (!today) return;
+                    const days = Math.ceil((new Date(i.tgl_berakhir) - today) / 86400000);
+                    const dc = days < 0 ? '#94a3b8' : days <= 30 ? '#dc2626' : '#d97706';
+                    const bg = days < 0 ? '#f8fafc' : days <= 30 ? '#fef2f2' : '#fffbeb';
+                    rows.push(`<div class="unified-item" style="background:${bg}" onclick="showPage('bapeten')">
+                        <div style="width:34px;height:34px;border-radius:9px;background:${bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;color:${dc};border:1.5px solid ${dc}30;">
+                            <i data-lucide="shield-alert" style="width:14px;height:14px;"></i>
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <p style="font-size:12px;font-weight:700;color:#0b2626;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${i.nama}</p>
+                            <p style="font-size:10px;color:#8ab0b0;">Berakhir: ${i.tgl_berakhir}</p>
+                        </div>
+                        <span class="unified-days" style="background:${bg};color:${dc};border:1.5px solid ${dc}40;">${days<0?'Expired':days+' hari'}</span>
+                    </div>`);
+                });
+            }
+        }
+
+        if (rows.length === 0) {
+            el.innerHTML = '<p style="font-size:12px;color:#8ab0b0;font-style:italic;padding:8px 10px;">Belum ada data...</p>';
         } else {
-            alertEl.innerHTML = alertBapeten.slice(0,5).map(i => {
-                const days = Math.ceil((new Date(i.tgl_berakhir) - today) / 86400000);
-                const bg = days < 0 ? '#f8fafc' : days <= 30 ? '#fef2f2' : '#fffbeb';
-                const dayColor = days < 0 ? '#94a3b8' : days <= 30 ? '#dc2626' : '#d97706';
-                return `<div class="flex items-center justify-between p-2.5 rounded-xl" style="background:${bg};">
-                    <div>
-                        <p style="font-size:12px;font-weight:700;color:#0b2626;">${i.nama}</p>
-                        <p style="font-size:10px;color:#8ab0b0;">${i.tgl_berakhir}</p>
-                    </div>
-                    <span class="chip" style="font-size:10px;font-weight:800;background:${bg};color:${dayColor};border:1.5px solid ${dayColor}30;">${days<0?'Expired':days+'h lagi'}</span>
-                </div>`;
-            }).join('');
+            el.innerHTML = rows.join('');
         }
         lucide.createIcons();
+
+        // Update sync time
+        const syncEl = document.getElementById('sync-time');
+        if (syncEl) syncEl.textContent = new Date().toLocaleTimeString('id-ID');
+    }
+
+    function renderDashboardWidgets(items, alertBapeten, today) {
+        window._dashItems = items;
+        window._dashAlerts = alertBapeten;
+        window._dashToday = today;
+
+        renderUnifiedList();
+
+        // Update progress bars on stat cards
+        const total = items.length;
+        const aktif = items.filter(i=>i.status==='aktif').length;
+        const rusak = items.filter(i=>i.status==='rusak').length;
+        const mtc   = items.filter(i=>i.status==='maintenance').length;
+        const bapTotal = (window._allBapetenCount || alertBapeten.length) || 1;
+
+        document.getElementById('stat-maintenance').textContent = mtc;
+
+        function setBar(id, pct) {
+            const el = document.getElementById(id);
+            if (el) setTimeout(()=>{ el.style.width = Math.min(100,pct)+'%'; }, 150);
+        }
+        if (total > 0) {
+            setBar('prog-aktif', aktif/total*100);
+            setBar('prog-rusak', rusak/total*100);
+            setBar('prog-maintenance', mtc/total*100);
+            setBar('prog-bapeten', alertBapeten.length > 0 ? Math.min(100, alertBapeten.length/Math.max(total,1)*100*3) : 0);
+        }
+        setBar('prog-total', 100);
+
+        // Dashboard donut chart
+        renderDashDonut(aktif, rusak, mtc);
+    }
+
+    // ===== CHARTS =====
+    window._chartInstances = {};
+
+    function destroyChart(id) {
+        if (window._chartInstances[id]) {
+            window._chartInstances[id].destroy();
+            delete window._chartInstances[id];
+        }
+    }
+
+    function renderDashDonut(aktif, rusak, mtc) {
+        const ctx = document.getElementById('dash-donut-chart');
+        if (!ctx) return;
+        destroyChart('dash-donut');
+        const total = aktif + rusak + mtc || 1;
+        window._chartInstances['dash-donut'] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Aktif','Rusak','Maintenance'],
+                datasets: [{ data: [aktif,rusak,mtc], backgroundColor:['#54b0b2','#f58320','#3ea4ac'], borderWidth:0, hoverOffset:6 }]
+            },
+            options: {
+                cutout:'68%', responsive:true, maintainAspectRatio:false,
+                plugins: {
+                    legend:{ display:false },
+                    tooltip:{ callbacks:{ label: ctx => ` ${ctx.label}: ${ctx.raw} unit (${Math.round(ctx.raw/total*100)}%)` } }
+                }
+            }
+        });
+        // legend
+        const legEl = document.getElementById('dash-donut-legend');
+        if (legEl) {
+            const colors = ['#54b0b2','#f58320','#3ea4ac'];
+            const labels = ['Aktif','Rusak','Maintenance'];
+            const vals = [aktif,rusak,mtc];
+            legEl.innerHTML = labels.map((l,i)=>`
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <div style="width:10px;height:10px;border-radius:3px;background:${colors[i]};flex-shrink:0;"></div>
+                        <span style="color:#2d4a4a;">${l}</span>
+                    </div>
+                    <span style="font-weight:700;color:#0b2626;">${vals[i]} <span style="font-weight:400;color:#8ab0b0;font-size:10px;">(${Math.round(vals[i]/total*100)}%)</span></span>
+                </div>`).join('');
+        }
     }
 
     function renderStatistik(items) {
-        // Color palette matching brand
-        const barColors = {
-            aktif: 'linear-gradient(90deg,#54b0b2,#119c9f)',
-            rusak: 'linear-gradient(90deg,#f5a45a,#f58320)',
-            maintenance: 'linear-gradient(90deg,#fbbf24,#d97706)',
-            low: 'linear-gradient(90deg,#7fb9c0,#54b0b2)',
-            medium: 'linear-gradient(90deg,#f5a45a,#f58320)',
-            high: 'linear-gradient(90deg,#f87171,#dc2626)',
-        };
-
-        function drawBar(containerId, dataMap, colors) {
-            const el = document.getElementById(containerId);
-            if (!el) return;
-            const total = Object.values(dataMap).reduce((a,b) => a+b, 0);
-            if (total === 0) { el.innerHTML = '<p style="font-size:12px;color:#8ab0b0;font-style:italic;">Belum ada data</p>'; return; }
-            el.innerHTML = Object.entries(dataMap).map(([k,v]) => {
-                const pct = Math.round(v/total*100);
-                const grad = colors[k] || 'linear-gradient(90deg,#7fb9c0,#119c9f)';
-                return `<div>
-                    <div class="flex justify-between items-center mb-1">
-                        <span style="font-size:13px;font-weight:700;color:#2d4a4a;text-transform:capitalize;">${k}</span>
-                        <span class="font-mono" style="font-size:12px;color:#8ab0b0;">${v} unit (${pct}%)</span>
-                    </div>
-                    <div style="height:10px;background:#e6f2f3;border-radius:999px;overflow:hidden;">
-                        <div class="bar-fill" style="height:100%;border-radius:999px;width:0%;background:${grad};transition:width 0.8s cubic-bezier(0.4,0,0.2,1);" data-width="${pct}"></div>
-                    </div>
-                </div>`;
-            }).join('');
-            // Animate bars
-            setTimeout(() => {
-                el.querySelectorAll('.bar-fill[data-width]').forEach(bar => {
-                    bar.style.width = bar.dataset.width + '%';
-                });
-            }, 100);
-        }
-
         const statusCount = { aktif: 0, rusak: 0, maintenance: 0 };
         const risikoCount = { low: 0, medium: 0, high: 0 };
         const lokasiCount = {};
         items.forEach(i => {
             if (i.status) statusCount[i.status] = (statusCount[i.status]||0) + 1;
-            if (i.risiko) risikoCount[i.risiko] = (risikoCount[i.risiko]||0) + 1;
+            if (i.risiko)  risikoCount[i.risiko]  = (risikoCount[i.risiko]||0)  + 1;
             const lok = i.lokasi || 'Tidak diketahui';
             lokasiCount[lok] = (lokasiCount[lok]||0) + 1;
         });
 
-        drawBar('chart-status', statusCount, barColors);
-        drawBar('chart-risiko', risikoCount, barColors);
-        drawBar('chart-lokasi', lokasiCount, {});
+        // --- Status Donut ---
+        const sCtx = document.getElementById('chart-status-donut');
+        if (sCtx) {
+            destroyChart('stat-status');
+            const sVals = [statusCount.aktif, statusCount.rusak, statusCount.maintenance];
+            const sTotal = sVals.reduce((a,b)=>a+b,0)||1;
+            window._chartInstances['stat-status'] = new Chart(sCtx, {
+                type:'doughnut',
+                data:{ labels:['Aktif','Rusak','Maintenance'], datasets:[{ data:sVals, backgroundColor:['#54b0b2','#f58320','#3ea4ac'], borderWidth:0, hoverOffset:5 }] },
+                options:{ cutout:'65%',responsive:true,maintainAspectRatio:false,
+                    plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>` ${c.label}: ${c.raw} (${Math.round(c.raw/sTotal*100)}%)` } } }
+                }
+            });
+            const sLeg = document.getElementById('chart-status-legend');
+            if (sLeg) {
+                const sCols=['#54b0b2','#f58320','#3ea4ac'], sLbls=['Aktif','Rusak','Maintenance'];
+                sLeg.innerHTML = sLbls.map((l,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:2px 0;">
+                    <div style="display:flex;align-items:center;gap:6px;"><div style="width:10px;height:10px;border-radius:3px;background:${sCols[i]};"></div><span style="color:#2d4a4a;text-transform:capitalize;">${l}</span></div>
+                    <span style="font-weight:700;color:#0b2626;">${sVals[i]} <span style="color:#8ab0b0;font-size:10px;">(${Math.round(sVals[i]/sTotal*100)}%)</span></span>
+                </div>`).join('');
+            }
+        }
+
+        // --- Risiko Donut ---
+        const rCtx = document.getElementById('chart-risiko-donut');
+        if (rCtx) {
+            destroyChart('stat-risiko');
+            const rVals = [risikoCount.low, risikoCount.medium, risikoCount.high];
+            const rTotal = rVals.reduce((a,b)=>a+b,0)||1;
+            window._chartInstances['stat-risiko'] = new Chart(rCtx, {
+                type:'doughnut',
+                data:{ labels:['Low Risk','Medium Risk','High Risk'], datasets:[{ data:rVals, backgroundColor:['#7fb9c0','#f5a45a','#f87171'], borderWidth:0, hoverOffset:5 }] },
+                options:{ cutout:'65%',responsive:true,maintainAspectRatio:false,
+                    plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>` ${c.label}: ${c.raw} (${Math.round(c.raw/rTotal*100)}%)` } } }
+                }
+            });
+            const rLeg = document.getElementById('chart-risiko-legend');
+            if (rLeg) {
+                const rCols=['#7fb9c0','#f5a45a','#f87171'], rLbls=['Low Risk','Medium Risk','High Risk'];
+                rLeg.innerHTML = rLbls.map((l,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:2px 0;">
+                    <div style="display:flex;align-items:center;gap:6px;"><div style="width:10px;height:10px;border-radius:3px;background:${rCols[i]};"></div><span style="color:#2d4a4a;">${l}</span></div>
+                    <span style="font-weight:700;color:#0b2626;">${rVals[i]} <span style="color:#8ab0b0;font-size:10px;">(${Math.round(rVals[i]/rTotal*100)}%)</span></span>
+                </div>`).join('');
+            }
+        }
+
+        // --- Lokasi Bar Chart ---
+        const lCtx = document.getElementById('chart-lokasi-bar');
+        if (lCtx) {
+            destroyChart('stat-lokasi');
+            const lokasiSorted = Object.entries(lokasiCount).sort((a,b)=>b[1]-a[1]).slice(0,10);
+            const lLabels = lokasiSorted.map(([k])=>k);
+            const lVals   = lokasiSorted.map(([,v])=>v);
+            window._chartInstances['stat-lokasi'] = new Chart(lCtx, {
+                type:'bar',
+                data:{ labels:lLabels, datasets:[{ label:'Jumlah Alat', data:lVals,
+                    backgroundColor:'rgba(17,156,159,0.75)', borderColor:'#119c9f', borderWidth:1,
+                    borderRadius:6, borderSkipped:false
+                }] },
+                options:{
+                    responsive:true, maintainAspectRatio:false, indexAxis:'y',
+                    plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>` ${c.raw} unit` } } },
+                    scales:{
+                        x:{ grid:{ color:'rgba(0,0,0,0.05)' }, ticks:{ font:{size:11}, color:'#8ab0b0' } },
+                        y:{ grid:{ display:false }, ticks:{ font:{size:11,weight:'700'}, color:'#2d4a4a' } }
+                    }
+                }
+            });
+        }
+
+        // Summary row
+        const total = items.length;
+        const summaryEl = document.getElementById('stat-summary-row');
+        if (summaryEl) {
+            const pctAktif = total ? Math.round(statusCount.aktif/total*100) : 0;
+            summaryEl.innerHTML = [
+                { label:'Tingkat Operasional', val: pctAktif+'%', sub:'dari total alat aktif', color:'var(--c2)' },
+                { label:'Alat Berisiko Tinggi', val: risikoCount.high, sub:'unit high risk', color:'#dc2626' },
+                { label:'Total Lokasi', val: Object.keys(lokasiCount).length, sub:'ruangan terdaftar', color:'var(--c5)' },
+            ].map(s=>`<div class="stat-card p-4" style="border-top:4px solid ${s.color};">
+                <p style="font-size:10px;font-weight:900;text-transform:uppercase;color:#8ab0b0;letter-spacing:0.1em;margin-bottom:6px;">${s.label}</p>
+                <h3 style="font-size:28px;font-weight:900;color:#0b2626;line-height:1;">${s.val}</h3>
+                <p style="font-size:11px;color:#8ab0b0;margin-top:4px;">${s.sub}</p>
+            </div>`).join('');
+        }
     }
 
     function renderLogs(data) {
