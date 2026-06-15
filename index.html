@@ -1068,8 +1068,8 @@
                     <td class="px-5 py-3.5"><span class="font-mono font-bold" style="color:var(--c2);font-size:12px;">${eq.kode||'—'}</span></td>
                     <td class="px-5 py-3.5">
                         <div class="flex items-center gap-3">
-                            ${eq.foto_b64
-                                ? `<img src="${eq.foto_b64}" class="eq-thumb" alt="foto" style="flex-shrink:0;">`
+                            ${eq.foto_drive_url
+                                ? `<img src="${eq.foto_drive_url}" class="eq-thumb" alt="foto" style="flex-shrink:0;">`
                                 : `<div class="eq-thumb-placeholder"><i data-lucide="cpu" style="width:16px;height:16px;"></i></div>`
                             }
                             <div>
@@ -1156,8 +1156,8 @@
             const recent = [...items].sort((a,b)=>(b.created_at||0)-(a.created_at||0)).slice(0,4);
             recent.forEach(i => {
                 const statusColor = i.status==='aktif'?'badge-aktif':i.status==='rusak'?'badge-rusak':'badge-maintenance';
-                const thumb = i.foto_b64
-                    ? `<img src="${i.foto_b64}" style="width:34px;height:34px;border-radius:9px;object-fit:cover;flex-shrink:0;border:1.5px solid #d4eaeb;">`
+                const thumb = i.foto_drive_url
+                    ? `<img src="${i.foto_drive_url}" style="width:34px;height:34px;border-radius:9px;object-fit:cover;flex-shrink:0;border:1.5px solid #d4eaeb;">`
                     : `<div style="width:34px;height:34px;border-radius:9px;background:#e6f7f7;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--c2);"><i data-lucide="cpu" style="width:14px;height:14px;"></i></div>`;
                 rows.push(`<div class="unified-item" onclick="showDetail('${i.id}')">
                     ${thumb}
@@ -1428,7 +1428,7 @@
             risiko: f.get('risiko'), link_file: f.get('link_file') || '',
             tahun_pengadaan: f.get('tahun_pengadaan') || '',
             catatan: f.get('catatan') || '',
-            foto_b64: document.getElementById('add-photo-b64').value || '',
+            foto_drive_url: document.getElementById('add-foto-drive-url').value || '',
             status: 'aktif', created_at: Date.now()
         };
         try {
@@ -1436,10 +1436,9 @@
             await window._setFn(window._pushFn(window._logRef), { user: 'Ino Rad', aksi: `Tambah ${data.nama}`, waktu: Date.now() });
             toggleModal('modal-add');
             e.target.reset();
-            // Reset photo
-            document.getElementById('add-photo-b64').value = '';
-            document.getElementById('add-photo-preview-wrap').classList.add('hidden');
-            document.getElementById('add-photo-placeholder').classList.remove('hidden');
+            // Reset photo preview
+            const addPrevWrap = document.getElementById('add-drive-preview-wrap');
+            if (addPrevWrap) addPrevWrap.classList.add('hidden');
             showToast('Alat berhasil ditambahkan!', 'success');
         } catch(err) {
             showToast('Gagal menyimpan: ' + err.message, 'error');
@@ -1465,10 +1464,8 @@
             catatan: document.getElementById('edit-catatan').value,
             link_file: document.getElementById('edit-link').value,
         };
-        // Only update foto if a new one was selected
-        const newFoto = document.getElementById('edit-photo-b64').value;
-        if (newFoto !== '__REMOVE__' && newFoto) data.foto_b64 = newFoto;
-        else if (newFoto === '__REMOVE__') data.foto_b64 = '';
+        // Update foto drive url (kosong = hapus)
+        data.foto_drive_url = document.getElementById('edit-foto-drive-url').value || '';
         try {
             await window._updateFn(window._refFn(window._db, `equipment/${id}`), data);
             await window._setFn(window._pushFn(window._logRef), { user: 'Ino Rad', aksi: `Edit ${data.nama}`, waktu: Date.now() });
@@ -1495,19 +1492,15 @@
         document.getElementById('edit-tgl-berakhir').value = eq.tgl_berakhir || '';
         document.getElementById('edit-catatan').value = eq.catatan || '';
         document.getElementById('edit-link').value = eq.link_file || '';
-        // Photo
-        const b64El = document.getElementById('edit-photo-b64');
-        const prevWrap = document.getElementById('edit-photo-preview-wrap');
-        const prevImg = document.getElementById('edit-photo-preview');
-        const placeholder = document.getElementById('edit-photo-placeholder');
-        b64El.value = '';
-        if (eq.foto_b64) {
-            prevImg.src = eq.foto_b64;
+        // Photo (Drive link)
+        document.getElementById('edit-foto-drive-url').value = eq.foto_drive_url || '';
+        const prevWrap = document.getElementById('edit-drive-preview-wrap');
+        const prevImg = document.getElementById('edit-drive-preview-img');
+        if (eq.foto_drive_url) {
+            prevImg.src = eq.foto_drive_url;
             prevWrap.classList.remove('hidden');
-            placeholder.classList.add('hidden');
         } else {
             prevWrap.classList.add('hidden');
-            placeholder.classList.remove('hidden');
         }
         toggleModal('modal-edit');
     };
@@ -1534,7 +1527,7 @@
         if (!eq) return;
         const risikoStyle = { low: 'color:#119c9f;font-weight:800;', medium: 'color:#f58320;font-weight:800;', high: 'color:#dc2626;font-weight:800;' };
         document.getElementById('detail-content').innerHTML = `
-            ${eq.foto_b64 ? `<img src="${eq.foto_b64}" class="detail-photo" alt="Foto ${eq.nama}">` : ''}
+            ${eq.foto_drive_url ? `<img src="${eq.foto_drive_url}" class="detail-photo" alt="Foto ${eq.nama}">` : ''}
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:#e6f7f7;">
                     <i data-lucide="cpu" class="w-6 h-6" style="color:var(--c2);"></i>
