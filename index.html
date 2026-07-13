@@ -688,7 +688,7 @@
                 </div>
                 <div class="flex flex-wrap gap-2">
                     <button onclick="generateAuditForSelectedMonth()" class="btn-orange" style="padding:9px 16px;font-size:12px;">
-                        <i data-lucide="wand-2" class="w-4 h-4"></i> Generate Audit Bulan Ini
+                        <i data-lucide="wand-2" class="w-4 h-4"></i> Hasil Audit
                     </button>
                     <button onclick="generateAuditBulkJanJul2025()" class="btn-ghost" style="padding:9px 16px;font-size:12px;">
                         <i data-lucide="calendar-range" class="w-3.5 h-3.5"></i> Generate Jan–Jul 2025 (Semua)
@@ -730,7 +730,7 @@
                     <i data-lucide="clipboard-x" class="w-10 h-10 mx-auto mb-3" style="color:#c0dde0;"></i>
                     <p style="font-size:13px;color:#8ab0b0;font-weight:600;">Belum ada audit untuk periode ini</p>
                     <button onclick="generateAuditForSelectedMonth()" class="btn-ghost mt-3" style="font-size:11px;padding:6px 14px;">
-                        <i data-lucide="wand-2" style="width:12px;height:12px;"></i> Generate Audit Sekarang
+                        <i data-lucide="wand-2" style="width:12px;height:12px;"></i> Hasil Audit
                     </button>
                 </div>
             </div>
@@ -1674,7 +1674,7 @@
         lucide.createIcons();
     };
 
-    // GENERATE AUDIT FOR A GIVEN MONTH (skips equipment already audited that month)
+    // Hasil Audit FOR A GIVEN MONTH (skips equipment already audited that month)
     async function generateAuditForMonth(bulanKey, silent) {
         const eqItems = Object.entries(window._eqData || {}).map(([id, v]) => ({ id, ...v })).filter(e => e.status === 'aktif');
         const existing = new Set(Object.values(window._auditData || {}).filter(a => a.bulan === bulanKey).map(a => a.equipment_id));
@@ -1706,7 +1706,7 @@
             const created = await generateAuditForMonth(bulan, false);
             showToast(created > 0 ? `Audit ${auditMonthLabel(bulan)} dibuat untuk ${created} alat.` : `Semua alat sudah diaudit untuk ${auditMonthLabel(bulan)}.`, created > 0 ? 'success' : 'info');
         } catch (err) {
-            showToast('Gagal generate audit: ' + err.message, 'error');
+            showToast('Gagal Hasil Audit: ' + err.message, 'error');
         }
     };
 
@@ -1720,7 +1720,7 @@
             await window._setFn(window._pushFn(window._logRef), { user: AUDIT_AUDITOR_NAME, aksi: `Audit Bulanan Massal Januari–Juli 2025 (${totalCreated} entri baru)`, waktu: Date.now() });
             showToast(`Audit Jan–Jul 2025 selesai dibuat (${totalCreated} entri baru). Hasil: Masih Layak & Baik.`, 'success');
         } catch (err) {
-            showToast('Gagal generate audit massal: ' + err.message, 'error');
+            showToast('Gagal Hasil Audit massal: ' + err.message, 'error');
         }
     };
 
